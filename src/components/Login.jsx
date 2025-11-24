@@ -1,0 +1,106 @@
+import React from "react";
+import { useForm } from "react-hook-form";
+import { Input, Button, Logo } from "./index";
+import { Link } from "react-router-dom";
+import { Login as serviceLogin } from "../services/user.service"
+import {jwtDecode} from "jwt-decode";//access Token sa value niklna ka liya
+import { useDispatch } from "react-redux";
+import {login as authLogin} from "../store/auth.slice"
+
+
+export default function Login() {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
+  const dispatch = useDispatch();
+
+  const login = (data) => {
+
+    serviceLogin(data.email, data.password).then((result) => {
+      reset();
+      // console.log("Login response", result.data.data.accessToken)
+      dispatch(authLogin(data));
+       const token = result.data.data.accessToken;
+        const decoded = jwtDecode(token);
+        console.log(decoded.email);
+        console.log(decoded.username);
+        console.log(decoded.fullName);
+        console.log(decoded._id);
+    })
+
+
+  };
+
+  return (
+    <div className="flex items-center justify-center w-full min-h-screen bg-gray-50">
+      <div className="mx-auto w-full max-w-lg bg-gray-100 rounded-xl p-10 border border-black/10 shadow-lg">
+        <div className="mb-4 flex justify-center">
+          <span className="inline-block w-full max-w-[100px]">
+            <Logo />
+          </span>
+        </div>
+
+        <h2 className="text-center text-2xl font-bold leading-tight">
+          Sign in to your account
+        </h2>
+
+        <p className="mt-2 text-center text-base text-black/60">
+          Don&apos;t have an account?&nbsp;
+          <Link
+            to="/signup"
+            className="font-medium text-primary transition-all duration-200 hover:underline"
+          >
+            Sign Up
+          </Link>
+        </p>
+
+        {/* Display form errors */}
+        {errors.email && (
+          <p className="text-red-600 mt-4 text-center">{errors.email.message}</p>
+        )}
+        {errors.password && (
+          <p className="text-red-600 mt-2 text-center">{errors.password.message}</p>
+        )}
+
+        <form onSubmit={handleSubmit(login)} className="mt-6 space-y-4">
+          <Input
+            lable="Email"
+            placeholder="Enter your email"
+            type="email"
+            {...register("email", {
+              required: "Email is required",
+              validate: {
+                matchPattern: (value) =>
+                  /^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/.test(value) ||
+                  "Email address must be valid",
+              },
+            })}
+          />
+
+          <Input
+            lable="Password"
+            placeholder="Enter your password"
+            type="password"
+            {...register("password", {
+              required: "Password is required",
+              validate: {
+                matchPattern: (value) =>
+                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+                    value
+                  ) ||
+                  "Password must have 8 characters, uppercase, lowercase, number, and special character",
+              },
+            })}
+          />
+
+          <Button type="submit" className="w-full mt-4">
+            Sign In
+          </Button>
+        </form>
+      </div>
+    </div>
+  );
+}
