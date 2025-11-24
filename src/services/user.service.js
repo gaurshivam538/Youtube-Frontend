@@ -1,10 +1,10 @@
 import axios from "axios";
 
 const serverUrl = import.meta.env.VITE_BACKEND_SERVER_URL;
-console.log(serverUrl);
-const SignUp = (username, email, fullName, password, avatar) => {
+
+const SignUp = async (username, email, fullName, password, avatar) => {
     try {
-        const response = axios.post(`${serverUrl}/register`,
+        const response = await axios.post(`${serverUrl}/register`,
             { username, email, fullName, password, avatar },
             {
                 headers: { "Content-Type": "multipart/form-data" }
@@ -18,9 +18,9 @@ const SignUp = (username, email, fullName, password, avatar) => {
 
 }
 
-const Login = (email, password) => {
+const Login = async(email, password) => {
     try {
-        const response = axios.post(`${serverUrl}/login`,
+        const response = await axios.post(`${serverUrl}/login`,
             { email, password },
             { withCredentials: true },
             {
@@ -34,7 +34,23 @@ const Login = (email, password) => {
     }
 }
 
+const Logout = async()=> {
+    try {
+        await axios.post(
+            `${serverUrl}/logout`,
+            {},
+            {
+                withCredentials: true, // VERY IMPORTANT FOR COOKIE TOKEN
+            }
+        );
+
+    } catch (error) {
+        console.log("Logout error")
+    }
+}
+
 export {
     SignUp,
-    Login
+    Login,
+    Logout
 }

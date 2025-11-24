@@ -4,20 +4,35 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import Container from "../container/Container";
+import { Logout as serviceLogout } from "../../services/user.service"
+import { logout as authLogout } from "../../store/auth.slice"
+
+
 
 function Header() {
   const [searchItem, setSearchItem] = useState("");
   const authStatus = useSelector((state) => state.auth.status);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const navItems = [
     { name: "Login", slug: "/login", active: !authStatus },
     { name: "Signup", slug: "/signup", active: !authStatus },
-    { name: "Logout", slug: "/logout", active: authStatus },
+    // { name: "Logout", slug: "/logout", active: authStatus },
     { name: "Create", slug: "/create", active: authStatus },
     { name: "UserProfile", slug: "/user-account-info", active: authStatus },
 
   ];
+
+  const logout = async () => {
+    try {
+      await serviceLogout();
+      dispatch(authLogout())
+
+    } catch (error) {
+
+    }
+  }
 
   return (
     <header className="bg-gray-100 shadow-md text-black">
@@ -44,18 +59,26 @@ function Header() {
 
           {/* Navigation */}
           <ul className="flex items-center gap-3">
-            {navItems.map((item) =>
-              item.active ? (
-                <li key={item.name}>
-                  <button
-                    onClick={() => navigate(item.slug)}
-                    className="px-3 py-1 hover:text-blue-600"
-                  >
-                    {item.name}
-                  </button>
-                </li>
-              ) : null
-            )}
+            <li>
+              {navItems.map((item) =>
+                item.active ? (
+                  <li key={item.name} className="flex ">
+                    <button
+                      onClick={() => navigate(item.slug)}
+                      className="px-3 py-1 hover:text-blue-600"
+                    >
+                      {item.name}
+                    </button>
+                  </li>
+                ) : null
+              )}
+            </li>
+            {
+              authStatus ?<button onClick={() => logout()} className="hover:text-blue-500 cursor-pointer">
+              Logout
+            </button> :null
+            }
+            
           </ul>
         </nav>
       </Container>
