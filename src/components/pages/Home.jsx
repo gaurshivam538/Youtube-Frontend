@@ -1,9 +1,10 @@
 import React from 'react';
+import VideoCard from '../VideoCard';
 
 function HomePage() {
   return (
     <div>
-      Home
+      <VideoCard/>
     </div>
   );
 }
