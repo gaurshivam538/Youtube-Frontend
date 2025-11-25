@@ -4,14 +4,37 @@ import './index.css'
 import App from './App.jsx'
 import store from "./store/store.js"
 import { Provider } from 'react-redux'
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, createBrowserRouter, RouterProvider } from "react-router-dom";
+import HomePage from './components/pages/Home.jsx'
+import LoginPage from './components/pages/Login.jsx'
+import SignupPage from './components/pages/Signup.jsx'
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      {
+        path:"/",
+        element:<HomePage/>
+      },
+      {
+        path: "/login",
+        element: <LoginPage/>
+      },
+      {
+        path:"/signup",
+        element:<SignupPage/>
+      },
+
+    ]
+  }
+])
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-    <Provider store = {store}>
-    <App />
-    </Provider>
-    </BrowserRouter>
+      <Provider store={store}>
+       <RouterProvider router={router}/>
+      </Provider>
   </StrictMode>,
 )

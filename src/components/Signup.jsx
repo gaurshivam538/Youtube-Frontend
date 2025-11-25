@@ -2,7 +2,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Input, Button, Logo } from "./index";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SignUp as serviceSignup, Login as serviceLogin } from "../services/user.service";
 import { useSelector, useDispatch } from "react-redux";
 import {login} from "../store/auth.slice"
@@ -15,13 +15,15 @@ export default function Signup() {
         formState: { errors },
     } = useForm();
 
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const SignUp = async (data) => {
-        const result = await serviceSignup(data.username, data.email, data.fullName, data.password, data.avatar[0])
+        const result = await serviceSignup(data.username, data.email, data.fullName, data.password, data.avatar[0]);
             reset();
-            await serviceLogin(data.email, data.password)
-            dispatch(login(result))
+            await serviceLogin(data.email, data.password);
+            dispatch(login(result));
+            navigate("/");
        
     };
 

@@ -6,6 +6,7 @@ import { Login as serviceLogin } from "../services/user.service"
 import { jwtDecode } from "jwt-decode";//access Token sa value niklna ka liya
 import { useDispatch } from "react-redux";
 import { login as authLogin } from "../store/auth.slice"
+import { useNavigate } from "react-router-dom";
 
 
 export default function Login() {
@@ -16,6 +17,7 @@ export default function Login() {
     formState: { errors },
   } = useForm();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const login = (data) => {
 
@@ -25,7 +27,7 @@ export default function Login() {
       if (result.data.data.accessToken) {
 
         dispatch(authLogin(data));
-
+        navigate("/")
       }
       const token = result.data.data.accessToken;
       const decoded = jwtDecode(token);
