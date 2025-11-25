@@ -18,7 +18,7 @@ const SignUp = async (username, email, fullName, password, avatar) => {
 
 }
 
-const Login = async(email, password) => {
+const Login = async (email, password) => {
     try {
         const response = await axios.post(`${serverUrl}/login`,
             { email, password },
@@ -27,14 +27,14 @@ const Login = async(email, password) => {
                 headers: { "Content-Type": "application/json" }
             }
         )
-       
+
         return response;
     } catch (error) {
         console.log("Login error:", error.response?.data || error.massage)
     }
 }
 
-const Logout = async()=> {
+const Logout = async () => {
     try {
         await axios.post(
             `${serverUrl}/logout`,
@@ -49,8 +49,24 @@ const Logout = async()=> {
     }
 }
 
+const Userprofile = async () => {
+    try {
+        const response = await axios.get(
+            `${serverUrl}/profile-image`,
+            {
+                withCredentials: true,
+            }
+        );
+        
+        return response;
+    } catch (error) {
+        throw error;
+    }
+}
+
 export {
     SignUp,
     Login,
-    Logout
+    Logout,
+    Userprofile
 }

@@ -3,9 +3,9 @@ import { useForm } from "react-hook-form";
 import { Input, Button, Logo } from "./index";
 import { Link } from "react-router-dom";
 import { Login as serviceLogin } from "../services/user.service"
-import {jwtDecode} from "jwt-decode";//access Token sa value niklna ka liya
+import { jwtDecode } from "jwt-decode";//access Token sa value niklna ka liya
 import { useDispatch } from "react-redux";
-import {login as authLogin} from "../store/auth.slice"
+import { login as authLogin } from "../store/auth.slice"
 
 
 export default function Login() {
@@ -22,13 +22,17 @@ export default function Login() {
     serviceLogin(data.email, data.password).then((result) => {
       reset();
       // console.log("Login response", result.data.data.accessToken)
-      dispatch(authLogin(data));
-       const token = result.data.data.accessToken;
-        const decoded = jwtDecode(token);
-        console.log(decoded.email);
-        console.log(decoded.username);
-        console.log(decoded.fullName);
-        console.log(decoded._id);
+      if (result.data.data.accessToken) {
+
+        dispatch(authLogin(data));
+
+      }
+      const token = result.data.data.accessToken;
+      const decoded = jwtDecode(token);
+      // console.log(decoded.email);
+      // console.log(decoded.username);
+      // console.log(decoded.fullName);
+      // console.log(decoded._id);
     })
 
 

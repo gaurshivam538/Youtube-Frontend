@@ -3,7 +3,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { Input, Button, Logo } from "./index";
 import { Link } from "react-router-dom";
-import { SignUp as serviceSignup } from "../services/user.service";
+import { SignUp as serviceSignup, Login as serviceLogin } from "../services/user.service";
 import { useSelector, useDispatch } from "react-redux";
 import {login} from "../store/auth.slice"
 
@@ -17,12 +17,12 @@ export default function Signup() {
 
     const dispatch = useDispatch()
 
-    const SignUp = (data) => {
-        serviceSignup(data.username, data.email, data.fullName, data.password, data.avatar[0]).then((result) => {
-            reset()
-            console.log("Response is this", result)
+    const SignUp = async (data) => {
+        const result = await serviceSignup(data.username, data.email, data.fullName, data.password, data.avatar[0])
+            reset();
+            await serviceLogin(data.email, data.password)
             dispatch(login(result))
-        }).catch(err => console.log(err))
+       
     };
 
 
