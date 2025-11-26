@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Logo, Input, Logout } from "../index";
+import { Logo, Input, Logout, CreateMenu } from "../index";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
@@ -30,7 +30,6 @@ function Header() {
   const navItems = [
     { name: "Login", slug: "/login", active: !authStatus },
     { name: "Signup", slug: "/signup", active: !authStatus },
-    { name: "Create", slug: "/create", active: authStatus },
   ];
 
   return (
@@ -73,6 +72,7 @@ function Header() {
               )}
 
             <li>{authStatus && <Logout />}</li>
+            <li>{authStatus && <CreateMenu/>}</li>
             <li>{authStatus && <Userprofile />}</li>
           </ul>
         </nav>

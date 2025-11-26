@@ -5,13 +5,16 @@ import Button from "./Button"
 import Login from "./Login"
 import Signup from "./Signup"
 import Logout from "./Logout"
+import CreateMenu from "./CreatePopup"
 export  {
     Logo,
     Input,
     Button,
     Login,
     Signup,
-    Logout
+    Logout,
+    CreateMenu
+    
 }
 
 //  <main className="channel-page">
