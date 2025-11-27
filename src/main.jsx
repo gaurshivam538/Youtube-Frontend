@@ -8,7 +8,7 @@ import { BrowserRouter, createBrowserRouter, RouterProvider } from "react-router
 import HomePage from './components/pages/Home.jsx'
 import LoginPage from './components/pages/Login.jsx'
 import SignupPage from './components/pages/Signup.jsx'
-
+import MainLongVideoCard from './components/VideoCard/mainLongVideoCard.jsx'
 const router = createBrowserRouter([
   {
     path: "/",
@@ -26,6 +26,10 @@ const router = createBrowserRouter([
         path:"/signup",
         element:<SignupPage/>
       },
+      {
+        path: "/watch",
+        element:<MainLongVideoCard/>
+      }
 
     ]
   }

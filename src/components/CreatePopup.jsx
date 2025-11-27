@@ -29,7 +29,7 @@ function CreateMenu() {
 
       {/* Popup Menu */}
       {open && (
-        <div className="absolute right-0 mt-3 w-52 bg-[#1f1f1f] rounded-xl shadow-lg p-3 z-50">
+        <div className="absolute left-0 mt-3 mr-10  w-52 bg-[#1f1f1f] rounded-xl shadow-lg p-3 z-50">
           
           {/* Option 1 */}
           <button className="flex gap-3 items-center w-full text-white hover:bg-[#333] p-2 rounded-lg">

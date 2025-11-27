@@ -5,7 +5,7 @@ import Footer from "./components/Footer/footer";
 import { Outlet } from "react-router-dom";
 function App() {
   return (
-    <div className="">
+    <div className="text-black">
       {/* Header */}
       {/* <header className="header">
         <div className="logo">YouTube</div>
@@ -24,7 +24,7 @@ function App() {
       <main>
         <Outlet/>
       </main>
-      <Footer/>
+      {/* <Footer/> */}
       {/* <Login/>
       <Signup/> */}
 

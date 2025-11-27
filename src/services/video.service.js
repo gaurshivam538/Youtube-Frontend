@@ -17,6 +17,21 @@ const getAllVideos = async () => {
     }
 }
 
+const getSpecificVideo = async (videoId) => {
+    try {
+        const response = await axios.get(`
+            ${serverUrl}/get-specific-video/${videoId}`,
+            { withCredentials: true },
+        )
+
+        return response.data.data[0];
+    } catch (error) {
+        console.log("Error comes to fetch the video by id ", error);
+        throw error;
+    }
+}
+
 export {
     getAllVideos,
+    getSpecificVideo
 }
