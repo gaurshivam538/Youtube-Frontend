@@ -6,6 +6,7 @@ import Login from "./Login"
 import Signup from "./Signup"
 import Logout from "./Logout"
 import CreateMenu from "./CreatePopup"
+import UploadVideo from "./UploadVideo"
 export  {
     Logo,
     Input,
@@ -13,9 +14,42 @@ export  {
     Login,
     Signup,
     Logout,
-    CreateMenu
+    CreateMenu,
+    UploadVideo
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //  <main className="channel-page">
 //         <section className="channel-info">

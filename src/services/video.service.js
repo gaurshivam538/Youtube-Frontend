@@ -17,6 +17,28 @@ const getAllVideos = async () => {
     }
 }
 
+const uploadVideo = async (title, description, videoFile, thumbnail, category, isPublished) => {
+    
+    
+    try {
+        const response = await axios.post(
+            `${serverUrl}/upload-file`,
+
+            {
+                title, description, videoFile, thumbnail, category, isPublished
+            },
+            {
+                    headers: { "Content-Type": "multipart/form-data" },
+                    withCredentials:true
+
+            },
+        )
+        return response;
+    } catch (error) {
+        
+    }
+}
+
 const getSpecificVideo = async (videoId) => {
     try {
         const response = await axios.get(`
@@ -33,5 +55,6 @@ const getSpecificVideo = async (videoId) => {
 
 export {
     getAllVideos,
+    uploadVideo,
     getSpecificVideo
 }

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-
+import {Link} from "react-router-dom"
 function CreateMenu() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef();
@@ -34,7 +34,8 @@ function CreateMenu() {
           {/* Option 1 */}
           <button className="flex gap-3 items-center w-full text-white hover:bg-[#333] p-2 rounded-lg">
             <span>📤</span>
-            Upload video
+            <Link to ="/upload">
+            Upload Video</Link>
           </button>
 
           {/* Option 2 */}
