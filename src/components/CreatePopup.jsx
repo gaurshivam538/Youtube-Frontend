@@ -21,7 +21,7 @@ function CreateMenu() {
       {/* Create Button */}
       <button
         onClick={() => setOpen(!open)}
-        className="px-4 py-2 bg-neutral-800 text-white rounded-full flex items-center gap-2"
+        className="px-4 py-2 bg-[#313537] text-white rounded-full flex items-center gap-2"
       >
         <span className="text-xl">+</span>
         Create

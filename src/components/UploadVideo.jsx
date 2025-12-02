@@ -52,7 +52,6 @@ const UploadVideo = () => {
 
                     />
 
-
                     {
                         errors.video && (
                             <p className="text-red-500 bg-gray-200 mt-2">{errors.video.message}</p>

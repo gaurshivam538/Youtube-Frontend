@@ -10,6 +10,7 @@ import LoginPage from './components/pages/Login.jsx'
 import SignupPage from './components/pages/Signup.jsx'
 import MainLongVideoCard from './components/VideoCard/mainLongVideoCard.jsx'
 import UploadVideo from './components/pages/UploadVideo.jsx'
+import UserDashboard from './components/pages/UserDashboard.jsx'
 const router = createBrowserRouter([
   {
     path: "/",
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
       {
         path:"/upload",
         element:<UploadVideo/>
+      },
+      {
+        path: "/:username",
+        element: <UserDashboard/>
       }
 
     ]

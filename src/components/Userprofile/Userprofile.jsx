@@ -12,8 +12,8 @@ function Userprofile() {
         const fetchProfile = async () => {
              if (authStatus) {
                  const response = await serviceUserprofile();
-                 const url = response.data.data;
-                 setprofileUrl(url);
+                 const userImageUrl = response.data.data.userImage;//First data userServicesProvide 
+                 setprofileUrl(userImageUrl);
 
         }
         }

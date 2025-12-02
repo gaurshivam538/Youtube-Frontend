@@ -7,6 +7,7 @@ import Signup from "./Signup"
 import Logout from "./Logout"
 import CreateMenu from "./CreatePopup"
 import UploadVideo from "./UploadVideo"
+import ProfilePopup from "./ProfilePopup"
 export  {
     Logo,
     Input,
@@ -15,8 +16,9 @@ export  {
     Signup,
     Logout,
     CreateMenu,
-    UploadVideo
-    
+    UploadVideo,
+    ProfilePopup,
+
 }
 
 

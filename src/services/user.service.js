@@ -57,16 +57,32 @@ const Userprofile = async () => {
                 withCredentials: true,
             }
         );
-        
         return response;
     } catch (error) {
         throw error;
     }
 }
 
+const userDashboard = async (username) => {
+   try {
+    
+     const response = await axios.get(
+         `${serverUrl}/user-channel-profile/${username}`
+     ,
+     {withCredentials:true}
+     )
+     return response;
+   } catch (error) {
+    console.log("Error call the dashboard api", error)
+    return error.response;  // 🔥 return error so you can inspect in React
+   }
+    
+}
+
 export {
     SignUp,
     Login,
     Logout,
-    Userprofile
+    Userprofile,
+    userDashboard
 }

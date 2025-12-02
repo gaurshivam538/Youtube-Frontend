@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Logo, Input, Logout, CreateMenu } from "../index";
+import { Logo, Input, Logout, CreateMenu, ProfilePopup } from "../index";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
@@ -73,7 +73,7 @@ function Header() {
 
             <li>{authStatus && <Logout />}</li>
             <li>{authStatus && <CreateMenu/>}</li>
-            <li>{authStatus && <Userprofile />}</li>
+            <li>{authStatus && <ProfilePopup/>}</li>
           </ul>
         </nav>
       </Container>

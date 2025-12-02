@@ -8,6 +8,7 @@ import { HiSpeakerXMark } from "react-icons/hi2";
 import { FaPauseCircle } from "react-icons/fa";
 import { useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 function MainLongVideoCard() {
   const [params] = useSearchParams();
