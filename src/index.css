@@ -2,7 +2,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* Hide scrollbar (industry standard) */
+
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

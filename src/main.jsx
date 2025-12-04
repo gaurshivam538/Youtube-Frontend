@@ -11,6 +11,10 @@ import SignupPage from './components/pages/Signup.jsx'
 import MainLongVideoCard from './components/VideoCard/mainLongVideoCard.jsx'
 import UploadVideo from './components/pages/UploadVideo.jsx'
 import UserDashboard from './components/pages/UserDashboard.jsx'
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import DashboardHomePage from './components/DashboardComponenet/DashboardPages/DashboardHomePage.jsx'
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -38,7 +42,13 @@ const router = createBrowserRouter([
       },
       {
         path: "/:username",
-        element: <UserDashboard/>
+        element: <UserDashboard/>,
+        children: [
+          {
+            path:"/:username/features",
+            element: <DashboardHomePage/>
+          }
+        ]
       }
 
     ]

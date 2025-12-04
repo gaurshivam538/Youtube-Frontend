@@ -14,7 +14,7 @@ const DashboardForYouPortion = ({ data }) => {
 
   const scroll = (direction) => {
     if (!scrollRef.current) return;
-    const amount = 350; // YouTube style scroll value
+    const amount = 650; // YouTube style scroll value
 
     scrollRef.current.scrollBy({
       left: direction === "left" ? -amount : amount,
@@ -48,7 +48,7 @@ const DashboardForYouPortion = ({ data }) => {
       {/* Scrollable Section */}
       <div
         ref={scrollRef}
-        className="flex gap-x-2 overflow-x-auto scrollbar-hide scroll-smooth px-10 py-2"
+        className="flex gap-x-2 overflow-x-auto scrollbar-hide scroll-smooth py-2"
       >
         {sortedData.length === 0 && (
           <p className="text-gray-400 text-center w-full">
