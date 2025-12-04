@@ -22,6 +22,8 @@ const DashboardForYouPortion = ({ data }) => {
     });
   };
 
+
+
   return (
     <div className="relative w-full">
 

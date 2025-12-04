@@ -1,16 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
-import { Link, NavLink, useParams } from 'react-router-dom';
+import { Link, NavLink, Outlet, useMatch, useParams } from 'react-router-dom';
 import { userDashboard } from '../../services/user.service';
 import { FaSearch } from "react-icons/fa";
-import DashboardForYouPortion from './DashboardForYouPortion';
-import DashboardVideoPortion from './DashboardVideoPortion';
-import { SiYoutubeshorts } from "react-icons/si";
-import DashboardShortPortion from './DashboardShortPortion';
 const Dashboard = () => {
   const { username } = useParams()
   const [userInfo, setuserInfo] = useState({})
-
+  
   useEffect(() => {
     const fetchData = async () => {
       const response = await userDashboard(username);
@@ -20,13 +16,18 @@ const Dashboard = () => {
       }
       if (response.status == 200) {
         setuserInfo(response.data.data)
-        console.log(response.data.data)
+        // console.log(response.data.data)
       }
 
     }
     fetchData();
 
   }, [username]);
+
+  const homeMatch = useMatch(`/${username}`);//match the url value 
+const featuresMatch = useMatch(`/${username}/features`);
+
+const isHomeActive = homeMatch || featuresMatch;
   return (
     <div className=' w-[100%] mx-auto h-full'>
       {/* User Info */}
@@ -72,32 +73,20 @@ const Dashboard = () => {
       <div className='flex w-[85%] h-[5%] mx-auto items-center gap-x-8 mt-6 text-lg font-bold text-gray-500'>
         <div className=''>
           <NavLink
-            to={ `/${username}`}
-            
-            className={({ isActive }) =>
+           to={`/${username}/features`}
+            className={
               `relative cursor-pointer after:absolute after:left-0 after:-bottom-4 
      after:h-[3px] after:bg-black after:transition-all
-     ${isActive ? "after:w-full" : "after:w-0 hover:after:w-full"}`
+     ${isHomeActive ? "after:w-full" : "after:w-0 hover:after:w-full"}`
             }
           >
             Home
-            <NavLink
-  to={`/${username}/features`}
-  className={({ isActive }) =>
-    `relative cursor-pointer after:absolute after:left-0 after:-bottom-4 
-     after:h-[3px] after:bg-black after:transition-all
-     ${isActive ? "after:w-full" : "after:w-0 hover:after:w-full"}`
-  }
->
-  
-</NavLink>
-
           </NavLink>
 
         </div>
         <div>
           <NavLink
-            to="/videos"
+             to={`/${username}/videos`}
             className={({ isActive }) =>
               `relative cursor-pointer after:absolute after:left-0 after:-bottom-4 
      after:h-[3px] after:bg-black after:transition-all
@@ -108,7 +97,7 @@ const Dashboard = () => {
           </NavLink>
         </div>
         <NavLink
-          to="/short"
+         to={`/${username}/shorts`}
           className={({ isActive }) =>
             `relative cursor-pointer after:absolute after:left-0 after:-bottom-4 
      after:h-[3px] after:bg-black after:transition-all
@@ -134,44 +123,9 @@ const Dashboard = () => {
         </div>
       </div>
       <div className='h-[1px] bg-gray-300 w-[95%] mx-auto mt-4'></div>
-      <div className='w-[85%] mx-auto h-full'>
-        {/* {For You Portion} */}
-        <div className='flex flex-col gap-y-4 h-1/2'>
-          <div className='mt-4 text-xl font-bold'><h1>For You</h1></div>
-          <div className='h-[80%]'>
-            <DashboardForYouPortion data={userInfo.vc}>
-
-            </DashboardForYouPortion>
-          </div>
-        </div>
-        <div className='h-[1px] bg-gray-300 w-full mt-8 '></div>
-        {/* Video portion */}
-        <div className='w-full  h-full flex flex-col gap-y-3  mt-2'>
-          <div className='mt-4 text-xl font-bold'><h1>Videos</h1></div>
-          <div className='w-full h-full'>
-            <DashboardVideoPortion
-              data={userInfo.vc}
-            >
-            </DashboardVideoPortion>
-          </div>
-        </div>
-        <div className='h-[1px] bg-gray-300 w-full mt-8 '></div>
-
-        {/* {Short Portion} */}
-        <div className='w-full  h-full flex flex-col gap-y-3  mt-2'>
-          <div className='mt-4 text-xl font-bold flex items-center'>
-            <SiYoutubeshorts style={{ color: "red", height: "40px", width: "30px" }} />
-            <h1 className='ml-[10px] mb-1'>Shorts</h1></div>
-          <div className='w-full h-full'>
-            <DashboardShortPortion data={userInfo.vc} />
-          </div>
-        </div>
-        <div className='h-[1px] bg-gray-300 w-full mt-8 '></div>
-
-
-
-        <div></div>
-      </div>
+       <div className='w-[85%] mx-auto h-full'>
+    <Outlet/>
+    </div>
     </div>
   );
 }

@@ -41,8 +41,7 @@ function HomePage() {
        <HomeShortVideoCard/>
        <HomeShortVideoCard/>
        <HomeShortVideoCard/>
-       <HomeShortVideoCard/>
-       <HomeShortVideoCard/>
+     
       </div>
       
     </div>

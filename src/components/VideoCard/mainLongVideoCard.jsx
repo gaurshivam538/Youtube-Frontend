@@ -81,8 +81,8 @@ function MainLongVideoCard() {
 
 
   return (
-    <div className="w-full h-full mt-3">
-      <div className="relative w-[80%] mx-auto aspect-video rounded-xl overflow-hidden">
+    <div className="w-full h-full ">
+      <div className="relative w-full h-[740px]  overflow-hidden">
         <video
           poster={videoInfo.thumbnail}
           src={videoInfo.videoFile}

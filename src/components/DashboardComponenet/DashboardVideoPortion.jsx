@@ -4,8 +4,12 @@ import LongVideo from './VideoType/LongVideo'
 
 const DashboardVideoPortion = ({data}) => {
 // console.log(data)
-  const setVideo = Array.isArray(data)?data:[]
+  const setVideo = Array.isArray(data)? data:[]
 // console.log(setVideo)
+// const sortedVideos = data.sort(
+//   (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+// );
+// console.log(sortedVideos)
   return (
     <div className='w-full h-full '>
     <div className=' flex lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-2  '>

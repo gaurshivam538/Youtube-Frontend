@@ -34,7 +34,7 @@ function Header() {
 
   return (
     <header
-      className={`bg-gray-100 shadow-md text-black transition-all duration-300
+      className={`bg-transparent shadow-md text-black transition-all duration-300 py-2
       ${isFixed ? "fixed top-0 left-0 w-full z-50 "  : ""}`}
     >
       <Container>
@@ -45,11 +45,11 @@ function Header() {
 
           <div className="flex items-center border rounded-full bg-white lg:w-1/2 sm:w-1/2 border-gray-600">
             <Input
-              type="text"
+              type="search"
               placeholder="Search..."
               value={searchItem}
               onChange={(e) => setSearchItem(e.target.value)}
-              className="border-none outline-none lg:w-full px-9"
+              className="border-none outline-none lg:w-full px-9 sm:hidden"
             />
             <button className="p-2 mx-3 rounded-md hover:bg-gray-300">
               <FaSearch />
