@@ -19,7 +19,6 @@ const getAllVideos = async () => {
 
 const uploadVideo = async (title, description, videoFile, thumbnail, category, isPublished) => {
     
-    
     try {
         const response = await axios.post(
             `${serverUrl}/upload-file`,

@@ -23,6 +23,7 @@ function Header() {
     };
 
     window.addEventListener("scroll", handleScroll);
+    
     return () => 
       window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -34,11 +35,11 @@ function Header() {
 
   return (
     <header
-      className={`bg-transparent shadow-md text-black transition-all duration-300 py-2
+      className={`bg-white shadow-md text-black transition-all duration-300 py-2
       ${isFixed ? "fixed top-0 left-0 w-full z-50 "  : ""}`}
     >
       <Container>
-        <nav className={`flex items-center justify-between py-2 lg:px-6 bg-gray-200 `}>
+        <nav className={`flex items-center justify-between  lg:px-6 `}>
           <Link to="/">
             <Logo />
           </Link>
