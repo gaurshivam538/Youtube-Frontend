@@ -63,6 +63,7 @@ function MainLongVideoCard() {
   useEffect(() => {
     const fetchVideoInfo = async () => {
       const response = await getSpecificVideo(videoId);
+      console.log(response)
       setVideoInfo(response);
     };
 
@@ -146,7 +147,7 @@ function MainLongVideoCard() {
 
   return (
     <div className="w-full h-full ">
-      <div className="relative w-full  overflow-hidden">
+      <div className="relative w-full h-[600px] overflow-hidden">
         <video
           poster={videoInfo.thumbnail}
           controls={false}
