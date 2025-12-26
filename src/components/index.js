@@ -8,6 +8,7 @@ import Logout from "./Logout"
 import CreateMenu from "./CreatePopup"
 import UploadVideo from "./UploadVideo"
 import ProfilePopup from "./ProfilePopup"
+import Loader from "./Loader"
 export  {
     Logo,
     Input,
@@ -18,6 +19,7 @@ export  {
     CreateMenu,
     UploadVideo,
     ProfilePopup,
+    Loader,
 
 }
 

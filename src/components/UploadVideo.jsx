@@ -2,20 +2,39 @@ import { useForm } from "react-hook-form";
 import { Input } from "./index"
 import { uploadVideo } from "../services/video.service";
 import { Navigate, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const UploadVideo = () => {
+    
     const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
+    const [videoFile, setVideoFile] = useState(null);
+    const [thumbnailFile, setThumbnailFile] = useState(null);
+    const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
+    const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(null);
     const navigate = useNavigate();
+
+    const handleVideoFileChange = (e) => {
+        const selectFile = e.target.files[0];
+        if (!selectFile) return;
+        setVideoFile(selectFile);
+        setVideoPreviewUrl(URL.createObjectURL(selectFile))//This line of code take the preview of the video file
+    }
+
+    const handleThumbnailFileChange = (e) => {
+        const selectFile = e.target.files[0];
+        if (!selectFile) return;
+        setThumbnailFile(selectFile);
+        setThumbnailPreviewUrl(URL.createObjectURL(selectFile));
+    }
+
     const onSubmit = async (data) => {
-        
-        const result = await uploadVideo(data.title, data.description, data.video[0],data.thumbnail[0], data.category, data.isPublished);
+        const result = await uploadVideo(data.title, data.description, data.video[0], data.thumbnail[0], data.category, data.isPublished);
         if (result.status == 200) {
             reset();
-           navigate("/");
+            navigate("/");
         }
 
     }
-
 
     const videoFormat = ["video/mp4", "video/webm", "video/ogg", "video/mov", "video/mkv"];
     const thumbnailFormat = ["image/jpg", "image/jpeg", "image/png", "image/webp"];
@@ -26,31 +45,75 @@ const UploadVideo = () => {
             {/* register your input into the hook by invoking the "register" function */}
             <div className="flex flex-col w-[70%] lg:w-[50%] h-1/2 mx-auto shadow-md my-4   p-6 rounded-lg">
                 <div className="mb-3">
-                    <Input
-                        type="file"
-                        lable="VideoFile"
-                        placeholder="Upload File"
-                        className = "shadow-sm"
-                        {
-                        ...register("video", {
-                            required: "Please Upload a video",
-                            validate: {
-                                checkFormat: (value) => {
-                                    const file = value[0];
-                                    if (!file) {
-                                        return "Please Select a File"
-                                    }
-                                    if (!videoFormat.includes(file.type)) {
-                                        return "Please Upload  only this type formated -> mp4, webm, ogg", "mov", "mkv";
-                                    }
-                                    return true;
-                                }
-                            }
-                        }
+                    {
+                        videoFile && videoFile.type.startsWith("video") ?
+                            (
+                                <div className="flex justify-center">
+                                    <video
+                                        controls
+                                        src={videoPreviewUrl}
+                                        className="w-32 h-20 rounded"
+                                    />
+                                    <Input
+                                        type="file"
+                                        lable="VideoFile"
+                                        placeholder="Upload File"
+                                        className="shadow-sm mx-2"
+                                        {
+                                        ...register("video", {
+                                            required: "Please Upload a video",
+                                            validate: {
+                                                checkFormat: (value) => {
+                                                    const file = value[0];
+                                                    if (!file) {
+                                                        return "Please Select a File"
+                                                    }
+                                                    if (!videoFormat.includes(file.type)) {
+                                                        return "Please Upload  only this type formated -> mp4, webm, ogg", "mov", "mkv";
+                                                    }
+                                                    return true;
+                                                }
+                                            },
 
-                        )}
+                                            onChange: (e) => { handleVideoFileChange(e) }
+                                        }
 
-                    />
+                                        )}
+
+                                    />
+                                </div>
+                            ) : (
+                                <Input
+                                    type="file"
+                                    lable="VideoFile"
+                                    placeholder="Upload File"
+                                    className="shadow-sm "
+                                    {
+                                    ...register("video", {
+                                        required: "Please Upload a video",
+                                        validate: {
+                                            checkFormat: (value) => {
+                                                const file = value[0];
+                                                if (!file) {
+                                                    return "Please Select a File"
+                                                }
+                                                if (!videoFormat.includes(file.type)) {
+                                                    return "Please Upload  only this type formated -> mp4, webm, ogg", "mov", "mkv";
+                                                }
+                                                return true;
+                                            }
+                                        },
+
+                                        onChange: (e) => { handleVideoFileChange(e) }
+                                    }
+
+                                    )}
+
+                                />
+                            )
+
+                    }
+
 
                     {
                         errors.video && (
@@ -59,37 +122,76 @@ const UploadVideo = () => {
                     }
                 </div>
                 <div className="mb-3">
-                    <Input
-                        lable="Thumbnail"
-                        type="file"
-                        placeholder="Upload File"
-                        className = "shadow-sm"
+                    {
+                        thumbnailFile && thumbnailFile.type.startsWith("image") ? (
+                            <div className="flex justify-center">
+                                <img
+                                    src={thumbnailPreviewUrl}
+                                    className="h-20 w-40 rounded overflow-hidden  "
+                                />
+                                <Input
+                                    lable="Thumbnail"
+                                    type="file"
+                                    placeholder="Upload File"
+                                    className="shadow-sm mx-2"
 
-                        {
-                        ...register("thumbnail", {
-                            validate: {
-                                checkFormat: (value) => {
-                                    const file = value[0];
-                                    if (!file) {
-                                        return true
-                                    }
-                                    if (!thumbnailFormat.includes(file.type)) {
-                                        return "Please Upload  only this type formated -> jpg, jpeg ,png, webp";
-                                    }
-                                    return true;
+                                    {
+                                    ...register("thumbnail", {
+                                        validate: {
+                                            checkFormat: (value) => {
+                                                const file = value[0];
+                                                if (!file) {
+                                                    return true
+                                                }
+                                                if (!thumbnailFormat.includes(file.type)) {
+                                                    return "Please Upload  only this type formated -> jpg, jpeg ,png, webp";
+                                                }
+                                                return true;
 
+                                            }
+                                        },
+                                        onChange: (e) => { handleThumbnailFileChange(e) }
+                                    }
+
+                                    )}
+
+                                />
+                            </div>
+                        ) : (
+                            <Input
+                                lable="Thumbnail"
+                                type="file"
+                                placeholder="Upload File"
+                                className="shadow-sm"
+
+                                {
+                                ...register("thumbnail", {
+                                    validate: {
+                                        checkFormat: (value) => {
+                                            const file = value[0];
+                                            if (!file) {
+                                                return true
+                                            }
+                                            if (!thumbnailFormat.includes(file.type)) {
+                                                return "Please Upload  only this type formated -> jpg, jpeg ,png, webp";
+                                            }
+                                            return true;
+
+                                        }
+                                    },
+                                    onChange: (e) => { handleThumbnailFileChange(e) }
                                 }
-                            }
-                        }
 
-                        )}
+                                )}
 
-                    />
+                            />
+                        )
+                    }
 
 
                     {
                         errors.thumbnail && (
-                            <p className="text-red-500 bg-gray-200 mt-2">{errors.video.message}</p>
+                            <p className="text-red-500 bg-gray-200 mt-2">{errors.thumbnail.message}</p>
                         )
                     }
                 </div>
@@ -99,7 +201,7 @@ const UploadVideo = () => {
                     <Input
                         lable="Title"
                         type="text"
-                        className = "shadow-sm bg-transparent"
+                        className="shadow-sm bg-transparent"
 
                         placeholder="Enter your video title "
                         {...register("title", { required: true })} />
@@ -111,7 +213,7 @@ const UploadVideo = () => {
                     <Input
                         lable="Description"
                         type="text"
-                        className = "bg-transparent"
+                        className="bg-transparent"
                         placeholder="Enter your video description"
                         {...register("description", { required: true })} />
                     {/* errors will return when field validation fails  */}
@@ -141,25 +243,25 @@ const UploadVideo = () => {
                 </div>
                 <div className="flex w-full  mb-3 bg-slate-400 p-2 rounded-md">
                     <div className="flex items-center w-1/2">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                        <Input
-                            type="radio"
-                            value="true"
-                            {...register("isPublished")}
-                        />
-                         <span>Public</span>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <Input
+                                type="radio"
+                                value="true"
+                                {...register("isPublished")}
+                            />
+                            <span>Public</span>
                         </label>
                     </div>
 
                     <div className="flex items-end w-1/2">
-                                                  <label className="flex items-center gap-2 cursor-pointer">
+                        <label className="flex items-center gap-2 cursor-pointer">
 
-                        <Input
-                            type="radio"
-                            value="false"
-                            {...register("isPublished")}
-                        />
-                        <span>Private</span>
+                            <Input
+                                type="radio"
+                                value="false"
+                                {...register("isPublished")}
+                            />
+                            <span>Private</span>
                         </label>
                     </div>
 

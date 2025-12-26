@@ -6,26 +6,35 @@ function HomeLongVideoCard({ data }) {
   const time = timingFormat(data.duration);
   const videoRef = useRef(null);
 
-  useEffect(() => {
-    if (!data?.videoFile || !videoRef.current) return;
+  // useEffect(() => {
+  //   if (!data?.videoFile || !videoRef.current) return;
 
-    const video = videoRef.current;
-    const hlsUrl = data.videoFile; // must be .m3u8
+  //   const video = videoRef.current;
+  //   // video.addEventListener("progress", () => {
+  //   //   if (video.buffered.length > 0) {
+  //   //     console.log(
+  //   //       "Buffered till:",
+  //   //       video.buffered.end(0),
+  //   //       "seconds"
+  //   //     );
+  //   //   }
+  //   // });
+  //   const hlsUrl = data.videoFile; // must be .m3u8
 
-    if (Hls.isSupported()) {
-      const hls = new Hls({
-        lowLatencyMode: true,
-      });
+  //   if (Hls.isSupported()) {
+  //     const hls = new Hls({
+  //       lowLatencyMode: true,
+  //     });
 
-      hls.loadSource(hlsUrl);
-      hls.attachMedia(video);
+  //     hls.loadSource(hlsUrl);
+  //     hls.attachMedia(video);
 
-      return () => hls.destroy();
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      // Safari fallback
-      video.src = hlsUrl;
-    }
-  }, [data.videoFile]);
+  //     return () => hls.destroy();
+  //   } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+  //     // Safari fallback
+  //     video.src = hlsUrl;
+  //   }
+  // }, [data.videoFile]);
 
   return (
     <Link to={`watch/?v=${data._id}`}>
@@ -42,7 +51,7 @@ function HomeLongVideoCard({ data }) {
           />
 
           {/* Duration Tag */}
-          <span className="absolute bottom-2 right-2 bg-black text-xs px-1 py-0.5 rounded-md">
+          <span className="absolute bottom-2 right-2  bg-slate-200 text-xs px-1 py-0.5 rounded-md">
             {time}
           </span>
         </div>
@@ -77,12 +86,12 @@ const timingFormat = (sec) => {
   const minutes = Math.floor((sec % 3600) / 60);
   const second = sec % 60;
 
-  const m = minutes < 10 ? `0${minutes}`:minutes;
-  const s = second < 10 ? `0${second}`:second;
+  const m = minutes < 10 ? `0${minutes}` : minutes;
+  const s = second < 10 ? `0${second}` : second;
 
-  if(hours>0){
+  if (hours > 0) {
     return `${hours}:${m}:${s}`;
-    
+
   } return `${m}:${s}`;
 }
 
