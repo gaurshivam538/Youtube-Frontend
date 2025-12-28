@@ -46,6 +46,7 @@ const UploadVideo = () => {
             <div className="flex flex-col w-[70%] lg:w-[50%] h-1/2 mx-auto shadow-md my-4   p-6 rounded-lg">
                 <div className="mb-3">
                     {
+                        
                         videoFile && videoFile.type.startsWith("video") ?
                             (
                                 <div className="flex justify-center">
