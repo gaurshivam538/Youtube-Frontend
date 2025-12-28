@@ -3,15 +3,19 @@ import { Input } from "./index"
 import { uploadVideo } from "../services/video.service";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useState } from "react";
-
+import { useDispatch } from "react-redux";
+import { startUpload, updateProgress, uploadComplete, uploadFailed, } from "../store/upload.slice";
+import { v4 as uuidv4 } from "uuid";
 const UploadVideo = () => {
-    
+
     const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
     const [videoFile, setVideoFile] = useState(null);
     const [thumbnailFile, setThumbnailFile] = useState(null);
     const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
     const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(null);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
 
     const handleVideoFileChange = (e) => {
         const selectFile = e.target.files[0];
@@ -28,10 +32,38 @@ const UploadVideo = () => {
     }
 
     const onSubmit = async (data) => {
-        const result = await uploadVideo(data.title, data.description, data.video[0], data.thumbnail[0], data.category, data.isPublished);
-        if (result.status == 200) {
-            reset();
-            navigate("/");
+        const uploadId = uuidv4();
+        
+        dispatch(
+            startUpload({
+                id: uploadId,
+                title: data.title,
+            })
+        )
+
+        try {
+            const result = await uploadVideo(data.title, data.description, data.video[0], data.thumbnail[0], data.category, data.isPublished, (progress) => {
+                dispatch(updateProgress({
+                    id: uploadId,
+                    progress
+                }))
+            });
+    
+            dispatch(uploadComplete({
+                id: uploadId,
+                videoId: data.data._id,
+            }))
+
+            if (result.status == 200) {
+                console.log(result);
+                reset();
+                navigate("/");
+            }
+        } catch (err) {
+            dispatch(uploadFailed({
+                id:uploadId,
+                error:err.message
+            }))
         }
 
     }

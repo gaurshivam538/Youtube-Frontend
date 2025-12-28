@@ -6,7 +6,7 @@ const serverUrl = import.meta.env.VITE_BACKEND_SERVER_URL;
 const getAllVideos = async () => {
     try {
         const response = await axios.get(
-            `${serverUrl}/get-all-files`,
+            `/api/v1/users/get-all-files`,
             { withCredentials: true },
 
         )
@@ -17,18 +17,24 @@ const getAllVideos = async () => {
     }
 }
 
-const uploadVideo = async (title, description, videoFile, thumbnail, category, isPublished) => {
+const uploadVideo = async (title, description, videoFile, thumbnail, category, isPublished, onProgress) => {
     
     try {
         const response = await axios.post(
-            `${serverUrl}/upload-file`,
+            `/api/v1/users/upload-file`,
 
             {
                 title, description, videoFile, thumbnail, category, isPublished
             },
             {
                     headers: { "Content-Type": "multipart/form-data" },
-                    withCredentials:true
+                    withCredentials:true,
+                    onUploadProgress: (progressEvent) => {
+                        const percent = Math.round(
+                            (progressEvent.loaded)*100/progressEvent.total
+                        );
+                        onProgress(percent);
+                    }
 
             },
         )
@@ -41,7 +47,7 @@ const uploadVideo = async (title, description, videoFile, thumbnail, category, i
 const getSpecificVideo = async (videoId) => {
     try {
         const response = await axios.get(`
-            ${serverUrl}/get-specific-video/${videoId}`,
+            /api/v1/users/get-specific-video/${videoId}`,
             { withCredentials: true },
         )
 

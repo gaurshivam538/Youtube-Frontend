@@ -10,12 +10,14 @@ import { useParams } from 'react-router-dom';
 const ProfilePopup = () => {
     const [open, setopen] = useState(false);
     const authStatus = useSelector((state) => state.auth.status)
+    console.log(authStatus)
     const [userInfo, setUserInfo] = useState({});
     const menuRef = useRef();
 
     useEffect(() => {
         const fetchUserData = async () => {
             const response = await serviceUserprofile();
+            
             setUserInfo(response.data.data);
         }
         fetchUserData();

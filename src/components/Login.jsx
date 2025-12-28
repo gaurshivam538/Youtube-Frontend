@@ -23,14 +23,16 @@ export default function Login() {
 
     serviceLogin(data.email, data.password).then((result) => {
       reset();
-      // console.log("Login response", result.data.data.accessToken)
+      console.log("Login response", result.data.data.accessToken)
+
       if (result.data.data.accessToken) {
 
         dispatch(authLogin(data));
         navigate("/")
       }
-      const token = result.data.data.accessToken;
+      const token = result.data.data.accessToken
       const decoded = jwtDecode(token);
+      console.log(decoded)
       // console.log(decoded.email);
       // console.log(decoded.username);
       // console.log(decoded.fullName);

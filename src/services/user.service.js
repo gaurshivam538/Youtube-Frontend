@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const serverUrl = import.meta.env.VITE_BACKEND_SERVER_URL;
+// const serverUrl = import.meta.env.VITE_BACKEND_SERVER_URL;
 
 const SignUp = async (username, email, fullName, password, avatar) => {
     try {
-        const response = await axios.post(`${serverUrl}/register`,
+        const response = await axios.post(`/api/v1/users/register`,
             { username, email, fullName, password, avatar },
             {
                 headers: { "Content-Type": "multipart/form-data" }
@@ -20,13 +20,15 @@ const SignUp = async (username, email, fullName, password, avatar) => {
 
 const Login = async (email, password) => {
     try {
-        const response = await axios.post(`${serverUrl}/login`,
+        console.log("Service page",email,password)
+        const response = await axios.post(`/api/v1/users/login`,
             { email, password },
             { withCredentials: true },
             {
                 headers: { "Content-Type": "application/json" }
             }
         )
+        console.log("response",response);
 
         return response;
     } catch (error) {
@@ -37,7 +39,7 @@ const Login = async (email, password) => {
 const Logout = async () => {
     try {
         await axios.post(
-            `${serverUrl}/logout`,
+            `/api/v1/users/logout`,
             {},
             {
                 withCredentials: true, // VERY IMPORTANT FOR COOKIE TOKEN
@@ -52,7 +54,7 @@ const Logout = async () => {
 const Userprofile = async () => {
     try {
         const response = await axios.get(
-            `${serverUrl}/profile-image`,
+            `/api/v1/users/profile-image`,
             {
                 withCredentials: true,
             }
@@ -67,7 +69,7 @@ const userDashboard = async (username) => {
    try {
     
      const response = await axios.get(
-         `${serverUrl}/user-channel-profile/${username}`
+         `/api/v1/users/user-channel-profile/${username}`
      ,
      {withCredentials:true}
      )
@@ -84,5 +86,5 @@ export {
     Login,
     Logout,
     Userprofile,
-    userDashboard
+    userDashboard,
 }
