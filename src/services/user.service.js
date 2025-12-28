@@ -28,7 +28,6 @@ const Login = async (email, password) => {
                 headers: { "Content-Type": "application/json" }
             }
         )
-        console.log("response",response);
 
         return response;
     } catch (error) {

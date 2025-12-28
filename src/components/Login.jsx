@@ -23,11 +23,10 @@ export default function Login() {
 
     serviceLogin(data.email, data.password).then((result) => {
       reset();
-      console.log("Login response", result.data.data.accessToken)
 
-      if (result.data.data.accessToken) {
+      if (result.data.message === "Successs") {
 
-        dispatch(authLogin(data));
+        dispatch(authLogin(result.data.data.user));
         navigate("/")
       }
       const token = result.data.data.accessToken

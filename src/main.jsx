@@ -16,6 +16,7 @@ import DashboardHomePage from './components/DashboardComponenet/DashboardPages/D
 import UserDashboardPage from './components/pages/UserDashboard.jsx'
 import DashboardVideosPage from './components/DashboardComponenet/DashboardPages/DashboardVideosPage.jsx'
 import DashboardShortPage from './components/DashboardComponenet/DashboardPages/DashboardShortPage.jsx'
+import UploadedVideoAndAllVideo from './components/SpecificUserAllVideo/uploadedVideoAndAllVideo.jsx'
 
 const router = createBrowserRouter([
   {
@@ -51,7 +52,7 @@ const router = createBrowserRouter([
             element: <DashboardHomePage/>
           },
           {
-            path:'features',
+            path:"features",
             element: <DashboardHomePage/>
           },
           {
@@ -64,6 +65,10 @@ const router = createBrowserRouter([
           }
 
         ]
+      },
+      {
+        path:"/getallfiles",
+        element :<UploadedVideoAndAllVideo/>
       }
 
     ]

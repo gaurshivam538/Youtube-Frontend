@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { startUpload, updateProgress, uploadComplete, uploadFailed, } from "../store/upload.slice";
 import { v4 as uuidv4 } from "uuid";
+import { useSelector } from "react-redux";
 const UploadVideo = () => {
 
     const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
@@ -15,8 +16,10 @@ const UploadVideo = () => {
     const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
-
+    const authData = useSelector((state) => state.auth.userData);
+    const uploadData = useSelector((state) =>state.upload.uploads);
+    console.log("UploadData",uploadData);
+    
     const handleVideoFileChange = (e) => {
         const selectFile = e.target.files[0];
         if (!selectFile) return;
@@ -40,6 +43,7 @@ const UploadVideo = () => {
                 title: data.title,
             })
         )
+        navigate(`/getallfiles?username=${authData.username}`);
 
         try {
             const result = await uploadVideo(data.title, data.description, data.video[0], data.thumbnail[0], data.category, data.isPublished, (progress) => {
@@ -51,13 +55,11 @@ const UploadVideo = () => {
     
             dispatch(uploadComplete({
                 id: uploadId,
-                videoId: data.data._id,
+                videoId: result.data.data._id,
             }))
 
             if (result.status == 200) {
-                console.log(result);
                 reset();
-                navigate("/");
             }
         } catch (err) {
             dispatch(uploadFailed({

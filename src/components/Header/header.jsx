@@ -11,6 +11,8 @@ function Header() {
   const [isFixed, setIsFixed] = useState(false);
 
   const authStatus = useSelector((state) => state.auth.status);
+  // const authData = useSelector((state) =>state.auth.userData);
+  // console.log("AuthData=>",authData);
   const navigate = useNavigate();
 
   useEffect(() => {

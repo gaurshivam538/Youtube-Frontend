@@ -35,7 +35,6 @@ const uploadVideo = async (title, description, videoFile, thumbnail, category, i
                         );
                         onProgress(percent);
                     }
-
             },
         )
         return response;
