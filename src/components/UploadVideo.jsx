@@ -69,7 +69,6 @@ const UploadVideo = () => {
         }
 
     }
-
     
     const videoFormat = ["video/mp4", "video/webm", "video/ogg", "video/mov", "video/mkv"];
     const thumbnailFormat = ["image/jpg", "image/jpeg", "image/png", "image/webp"];
