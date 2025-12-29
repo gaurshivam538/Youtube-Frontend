@@ -1,251 +1,198 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { getSpecificVideo } from "../../services/video.service";
-import { Loader } from "../index"
-import { timingFormat } from "./homeLongVideoCard";
-import { FaPlay } from "react-icons/fa";
-import { HiSpeakerWave } from "react-icons/hi2";
-import { HiSpeakerXMark } from "react-icons/hi2";
-import { FaPauseCircle } from "react-icons/fa";
-import { useRef } from "react";
 import Hls from "hls.js";
-import { useLocation } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { getSpecificVideo } from "../../services/video.service";
+import { Loader } from "../index";
+import { timingFormat } from "./homeLongVideoCard";
+
+import { FaPlay, FaPause } from "react-icons/fa";
+import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 
 function MainLongVideoCard() {
   const [params] = useSearchParams();
-  //This is the basic command that i can copy the location of the current presenting page
-  // const location = useLocation();
-  // console.log(location)
-  // console.log(window.location.href);
-
   const videoId = params.get("v");
+
   const [videoInfo, setVideoInfo] = useState({});
-  const [isPlaying, setisPlaying] = useState(false);
-  const [currTime, setcurrTime] = useState("00/00");
-  const [progress, setProgress] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
-  const [buffered, setBuffered] = useState(0);
   const [showControls, setShowControls] = useState(false);
 
+  const [progress, setProgress] = useState(0);
+  const [buffered, setBuffered] = useState(0);
+  const [currTime, setCurrTime] = useState("00:00");
+
   const videoRef = useRef(null);
+  const progressRef = useRef(null);
 
 
   useEffect(() => {
-    const video = videoRef.current;
-    const handleWaiting = () => {
-      setIsBuffering(true);
-    }
+    if (!videoId) return;
 
-
-    const handlePlaying = () => {
-      setIsBuffering(false);
-    }
-
-
-    const handleProgress = () => {
-      if (video.buffered.length > 0) {
-        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-        const duration = video.duration;
-        setBuffered((bufferedEnd / duration) * 100);
-      }
-    }
-
-    video.addEventListener("waiting", handleWaiting);//this event listener track the chunks is they can not present memory then run
-    video.addEventListener("playing", handlePlaying);//this event listener track the chunks for the memory then present memory stack
-    video.addEventListener("progress", handleProgress);
-
-    return () => {
-      video.removeEventListener("waiting", handleWaiting);
-      video.removeEventListener("playing", handlePlaying);
-      video.removeEventListener("progress", handleProgress);
-    }
-  }, [])
-
-
-  useEffect(() => {
-    const fetchVideoInfo = async () => {
-      const response = await getSpecificVideo(videoId);
-      setVideoInfo(response);
+    const fetchVideo = async () => {
+      const res = await getSpecificVideo(videoId);
+      setVideoInfo(res);
     };
 
-    if (videoId) fetchVideoInfo();
+    fetchVideo();
   }, [videoId]);
-
-  const time = timingFormat(videoInfo.duration);
-
-
-  const toggleClick = () => {
-
-    if (!isPlaying) {
-      videoRef.current.play();
-    } else {
-      videoRef.current.pause();
-    }
-
-    setisPlaying(!isPlaying);
-  }
 
 
   useEffect(() => {
-    if (!videoInfo.videoFile || !videoRef.current) return;
+    if (!videoInfo?.videoFile || !videoRef.current) return;
 
     const video = videoRef.current;
     const hlsUrl = videoInfo.videoFile;
 
     if (Hls.isSupported()) {
-      const hls = new Hls({
-        lowLatencyMode: true,
-      });
+      const hls = new Hls({ lowLatencyMode: true });
       hls.loadSource(hlsUrl);
       hls.attachMedia(video);
+
       return () => hls.destroy();
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      //Safari fallback
-      video.scr = hlsUrl;
+      video.src = hlsUrl;
     }
+  }, [videoInfo]);
 
-  }, [videoInfo.videoFile]);
 
-  // const video = videoRef.current;
-  // video.addEventListener("progress", () => {
-  //   if (video.buffered.length > 0) {
-  //     console.log(
-  //       "Buffered till:",
-  //       video.buffered.end(0),
-  //       "seconds"
-  //     );
-  //   }
-  // })
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
 
+    const onWaiting = () => setIsBuffering(true);
+    const onPlaying = () => setIsBuffering(false);
+
+    const onProgress = () => {
+      if (video.buffered.length) {
+        const end = video.buffered.end(video.buffered.length - 1);
+        setBuffered((end / video.duration) * 100);
+      }
+    };
+
+    video.addEventListener("waiting", onWaiting);
+    video.addEventListener("playing", onPlaying);
+    video.addEventListener("progress", onProgress);
+
+    return () => {
+      video.removeEventListener("waiting", onWaiting);
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("progress", onProgress);
+    };
+  }, []);
+
+  
+  const togglePlay = () => {
+    if (!isPlaying) videoRef.current.play();
+    else videoRef.current.pause();
+
+    setIsPlaying(!isPlaying);
+  };
+
+  const toggleVolume = () => {
+    const muted = !videoRef.current.muted;
+    videoRef.current.muted = muted;
+    setIsMuted(muted);
+  };
 
   const handleTimeUpdate = () => {
     const video = videoRef.current;
-    const currentTime = Math.floor(video.currentTime)
-
-    setcurrTime(timingFormat(currentTime));
-
-    const percent = (video.currentTime / videoInfo.duration) * 100
-    setProgress(percent)
-
-  }
-
-
-  const progressRef = useRef();
+    setCurrTime(timingFormat(video.currentTime));
+    setProgress((video.currentTime / video.duration) * 100);
+  };
 
   const handleSeek = (e) => {
-    const video = videoRef.current;
-    const rect = progressRef.current.getBoundingClientRect();//Takethis function when my browser element excet position of the top,left,right,bottom
+    const rect = progressRef.current.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    const width = rect.width;
-    const newTime = (clickX / width) * videoInfo.duration
-    video.currentTime = newTime;
+    const percent = clickX / rect.width;
+    videoRef.current.currentTime = percent * videoInfo.duration;
+  };
 
-  }
+  const totalTime = timingFormat(videoInfo?.duration || 0);
 
-
-  const toggleVolume = () => {
-    if (!videoRef) {
-      return;
-    }
-    const newMuteState = !videoRef.current.muted;
-    videoRef.current.muted = newMuteState;
-    setIsMuted(newMuteState);
-  }
-
-
-
-
+  
   return (
-    <div className="w-full h-full ">
+    <div className="w-full bg-black">
       <div
+        className="relative w-full h-[220px] sm:h-[400px] md:h-[520px] lg:h-[600px]"
         onMouseEnter={() => setShowControls(true)}
         onMouseLeave={() => setShowControls(false)}
-        className="relative w-full h-[600px] overflow-hidden">
+      >
+        {/* VIDEO */}
         <video
-          poster={videoInfo.thumbnail}
-          controls={false}
           ref={videoRef}
+          poster={videoInfo.thumbnail}
           onTimeUpdate={handleTimeUpdate}
-          className="w-full h-full object-fill"
+          className="w-full h-full object-contain"
         />
 
-        {isBuffering ? (
-          <div
-            className="absolute z-40 bottom-[50%] left-[50%] w-[10%]"
-          >
+        {/* BUFFER LOADER */}
+        {isBuffering && (
+          <div className="absolute inset-0 flex items-center justify-center z-50">
             <Loader />
           </div>
-        ) : null
-        }
-        {/* Seekbar */}
+        )}
 
-        {
-          showControls && (
+        {/* PROGRESS BAR */}
+        {showControls && (
+          <div
+            ref={progressRef}
+            onClick={handleSeek}
+            className="absolute bottom-12 left-0 w-full h-1 bg-gray-600 cursor-pointer"
+          >
+            <div
+              className="h-full bg-white"
+              style={{ width: `${buffered}%` }}
+            />
+            <div
+              className="absolute top-0 h-full bg-red-600"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
 
-            <div>
-              <div
-                className="absolute bottom-14 h-1 bg-gray-500 rounded-lg left-1 w-[98%] z-10 cursor-pointer"
-                onClick={handleSeek}
-                ref={progressRef}
-              >
+        {/* CONTROLS BAR */}
+        {showControls && (
+          <div className="absolute bottom-0 left-0 w-full px-4 py-2 flex justify-between items-center bg-gradient-to-t from-black/80 to-transparent text-white">
+            {/* LEFT */}
+            <div className="flex items-center gap-4">
+              <button onClick={togglePlay}>
+                {isPlaying ? <FaPause size={20} /> : <FaPlay size={18} />}
+              </button>
 
-                <div
-                  className="absolute top-0 left-0 h-1 bg-white rounded z-10"
-                  style={{ width: `${buffered}%` }}
-                />
+              <button onClick={toggleVolume}>
+                {isMuted ? (
+                  <HiSpeakerXMark size={22} />
+                ) : (
+                  <HiSpeakerWave size={22} />
+                )}
+              </button>
 
-                <div
-                  className="absolute top-0 left-0 h-1 bg-red-600 rounded z-20"
-                  style={{ width: `${progress}%` }}
-                />
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                onChange={(e) =>
+                  (videoRef.current.volume = e.target.value)
+                }
+                className="w-24 accent-red-600"
+              />
 
-                <div
-                  className="absolute h-4 w-4 bg-red-700 rounded-full -top-[7px] z-30"
-                  style={{ left: `calc(${progress}% - 6px)` }}
-                />
-              </div>
-
-              <div className="pl-3">
-                <span className="absolute bottom-2 left-4 mt-2 bg-[#333536]   text-md  rounded-full">
-                  <button onClick={toggleClick} className="w-full h-full rounded-full px-3 py-3 ">
-                    {
-                      isPlaying ? <FaPauseCircle /> : <FaPlay />
-                    }
-
-                  </button>
-
-                </span>
-                <span className="absolute bottom-2 left-[70px] mt-4 bg-[#4a4843] hover:bg-[#333536] text-md px-3 py-3 flex flex-row rounded-full cursor-pointer">
-                  {isMuted ? (
-                    <HiSpeakerXMark className="ml-2 mr-4" onClick={toggleVolume} />
-                  ) : (
-                    <HiSpeakerWave className="ml-2 mr-4" onClick={toggleVolume} />
-                  )}
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    onChange={(e) => {
-                      videoRef.current.volume = e.target.value;
-                    }}
-                    className="w-28"
-                  />
-                </span>
-                <span className="absolute bottom-[6px] left-64 mt-2 bg-[#333536] text-md px-3 py-2  rounded-full">
-                  {`${currTime} / ${time}`}
-                </span>
-              </div>
+              <span className="text-sm text-gray-300">
+                {currTime} / {totalTime}
+              </span>
             </div>
-          )
-        }
 
+            {/* RIGHT (Future buttons) */}
+            <div className="flex items-center gap-4 text-sm">
+              <button className="hover:text-red-500">⚙️</button>
+              <button className="hover:text-red-500">⛶</button>
+            </div>
+          </div>
+        )}
       </div>
-
     </div>
-
   );
 }
 

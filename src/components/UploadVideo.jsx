@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
 import { Input } from "./index"
 import { uploadVideo } from "../services/video.service";
-import { Navigate, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { startUpload, updateProgress, uploadComplete, uploadFailed, } from "../store/upload.slice";
 import { v4 as uuidv4 } from "uuid";
@@ -17,9 +17,8 @@ const UploadVideo = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const authData = useSelector((state) => state.auth.userData);
-    const uploadData = useSelector((state) =>state.upload.uploads);
-    console.log("UploadData",uploadData);
-    
+    // const uploadData = useSelector((state) => state.upload.uploads);
+
     const handleVideoFileChange = (e) => {
         const selectFile = e.target.files[0];
         if (!selectFile) return;
@@ -34,42 +33,48 @@ const UploadVideo = () => {
         setThumbnailPreviewUrl(URL.createObjectURL(selectFile));
     }
 
+
     const onSubmit = async (data) => {
         const uploadId = uuidv4();
-        
         dispatch(
             startUpload({
                 id: uploadId,
                 title: data.title,
             })
         )
+
         navigate(`/getallfiles?username=${authData.username}`);
 
         try {
+
             const result = await uploadVideo(data.title, data.description, data.video[0], data.thumbnail[0], data.category, data.isPublished, (progress) => {
                 dispatch(updateProgress({
                     id: uploadId,
                     progress
                 }))
             });
-    
+
+            const uploadedVideoId = result.data.data._id;
+
             dispatch(uploadComplete({
                 id: uploadId,
-                videoId: result.data.data._id,
+                videoId: uploadedVideoId,
             }))
 
             if (result.status == 200) {
+
                 reset();
             }
+
         } catch (err) {
             dispatch(uploadFailed({
-                id:uploadId,
-                error:err.message
+                id: uploadId,
+                error: err.message
             }))
         }
 
     }
-    
+
     const videoFormat = ["video/mp4", "video/webm", "video/ogg", "video/mov", "video/mkv"];
     const thumbnailFormat = ["image/jpg", "image/jpeg", "image/png", "image/webp"];
 

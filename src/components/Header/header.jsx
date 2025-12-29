@@ -11,7 +11,7 @@ function Header() {
   const [isFixed, setIsFixed] = useState(false);
 
   const authStatus = useSelector((state) => state.auth.status);
-  // const authData = useSelector((state) =>state.auth.userData);
+  // const authData = useSelector((state) =>state.upload.uploads);
   // console.log("AuthData=>",authData);
   const navigate = useNavigate();
 
@@ -46,13 +46,13 @@ function Header() {
             <Logo />
           </Link>
 
-          <div className="flex items-center border rounded-full bg-white lg:w-1/2 sm:w-1/2 border-gray-600">
+          <div className="flex items-center border  rounded-full bg-white lg:w-1/2  border-gray-600">
             <Input
               type="search"
               placeholder="Search..."
               value={searchItem}
               onChange={(e) => setSearchItem(e.target.value)}
-              className="border-none outline-none lg:w-full px-9 sm:hidden"
+              className="border-none outline-none lg:w-full px-9 hidden sm:w-1/2 "
             />
             <button className="p-2 mx-3 rounded-md hover:bg-gray-300">
               <FaSearch />

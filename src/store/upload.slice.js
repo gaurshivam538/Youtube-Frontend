@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
     uploads: [],
 }
+
 const uploadSlice = createSlice({
     name: "upload",
     initialState,
@@ -35,7 +36,7 @@ const uploadSlice = createSlice({
         },
 
         processingComplete: (state, action) => {
-            const u = state.uploads.find(x => x.id === action.payload.id);
+            const u = state.uploads.find(x => x.videoId === action.payload.id);
             if (u) {
                 u.status = "ready";
             }
@@ -51,7 +52,7 @@ const uploadSlice = createSlice({
 
         removeUpload: (state, action) => {
             state.uploads = state.uploads.filter(
-                u => u.id !== action.payload
+                u => u.videoId !== action.payload.id
             );
         }
     }
