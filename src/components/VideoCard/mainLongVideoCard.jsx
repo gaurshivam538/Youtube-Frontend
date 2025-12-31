@@ -7,6 +7,13 @@ import { timingFormat } from "./homeLongVideoCard";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 import { SlDislike, SlLike } from "react-icons/sl";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { IoReorderThreeSharp } from "react-icons/io5";
+import { IoMdClose } from "react-icons/io";
+import { AiFillLike } from "react-icons/ai";
+import { AiFillDislike } from "react-icons/ai";
+
+
 
 function MainLongVideoCard() {
   const [params] = useSearchParams();
@@ -17,11 +24,14 @@ function MainLongVideoCard() {
   const [isMuted, setIsMuted] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [showControls, setShowControls] = useState(false);
-
+  const [commentInfo, setCommentInfo] = useState([]);
   const [progress, setProgress] = useState(0);
   const [buffered, setBuffered] = useState(0);
   const [currTime, setCurrTime] = useState("00:00");
   const [open, setOpen] = useState(false);
+  const [like, setLike] = useState(false);
+  const [dislike, setDisLike] = useState(false);
+
 
   const videoRef = useRef(null);
   const progressRef = useRef(null);
@@ -33,12 +43,14 @@ function MainLongVideoCard() {
     const fetchVideo = async () => {
       const res = await getSpecificVideo(videoId);
       setVideoInfo(res);
+      setCommentInfo(res.commentInfo);
+
     };
 
     fetchVideo();
   }, [videoId]);
 
-
+  
   useEffect(() => {
     if (!videoInfo?.videoFile || !videoRef.current) return;
 
@@ -203,10 +215,14 @@ function MainLongVideoCard() {
           {/* CHANNEL */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gray-600" >
-              <img
+              {
+                videoInfo?.owner.avatar && (
+                   <img
                 src={`${videoInfo.owner.avatar}`}
                 className="object-cover overflow-hidden w-full h-full rounded-full "
               />
+                )
+               }
             </div>
 
             <div>
@@ -221,13 +237,17 @@ function MainLongVideoCard() {
           </div>
 
           {/* LIKE / DISLIKE */}
+
           <div className="flex gap-2">
             <div className="bg-[#272727] px-4 py-2 rounded-full text-sm flex justify-center">
             <button className=" mr-4">
               <div className="flex justify-center gap-2">
-               <SlLike 
+               {
+                like ?(<AiFillLike />):( <SlLike 
                className="h-5 w-5"
-               />
+               />)
+               
+               }
                <p
                className="text-md text-bol"
                >{videoInfo.likes}</p>
@@ -235,9 +255,14 @@ function MainLongVideoCard() {
               </div>
             </button>
             <button className="">
-              <SlDislike 
+             { 
+              dislike ? (<AiFillDislike />):(
+                <SlDislike 
               className="h-5 w-5"
               />
+                )
+              
+              }
             </button>
             </div>
             <button className="bg-[#272727] px-4 py-2 rounded-full text-sm">
@@ -265,35 +290,70 @@ function MainLongVideoCard() {
               open ? (
                 <h2
                   onClick={() => setOpen(false)}
-                >Close</h2>
+                >
+                  <IoMdClose
+                  className="h-7 w-7"
+                  />
+                  </h2>
               ) : (
                 <h2
                   onClick={() => setOpen(true)}
-                >Open</h2>
+                ><IoReorderThreeSharp 
+                 className="h-7 w-7"
+                /></h2>
               )
             }
           </div>
 
           <div className="flex gap-3 mb-4">
-            <div className="w-9 h-9 rounded-full bg-gray-600" />
+            <div className="w-9 h-9 rounded-full bg-gray-600" >
+             {
+             videoInfo?.owner?.avatar && (<img
+              className="w-full h-full object-cover overflow-hidden rounded-full"
+              src={`${videoInfo.owner.avatar}`}
+              />)
+             }
+            </div>
             <input
               className="flex-1 bg-transparent border-b border-gray-600 outline-none text-sm"
               placeholder="Add a comment..."
             />
+            <input 
+            className="bg-blue-400 rounded-md max-w-fit px-2 py-1"
+            value="Add"
+            type ="submit"/>
           </div>
 
           {/* SINGLE COMMENT */}
           {
-            open ? (
-              <div className="flex gap-3">
-                <div className="w-9 h-9 rounded-full bg-gray-600" />
-                <div>
-                  <p className="text-sm font-medium">User Name</p>
-                  <p className="text-sm text-gray-300">
-                    Very nice video 🔥
-                  </p>
+            open &&  videoInfo?.owner && commentInfo.length >0 ? (
+              commentInfo.map((comment) => (
+                <div className="flex gap-3  mb-3" key={comment._id}>
+                
+                <div className="w-9 h-9 rounded-full bg-gray-600" >
+                 { 
+                  comment?.user?.avatar &&(<img 
+                  src={`${comment?.user?.avatar}`}
+                  className="h-full w-full rounded-full object-cover overflow-hidden"
+                  />)
+                  }
                 </div>
+                
+                  <div className="flex  w-full justify-between">
+                    <div className="flex flex-col ">
+                  <p className="text-sm font-medium">{comment.user.username}</p>
+                  <p className="text-sm text-gray-300">
+                   {comment.content}
+                  </p>
+                  </div>
+                  <div>
+                    <BsThreeDotsVertical />
+                  </div>
+                  </div>
+                
               </div>
+              ))
+              
             ) : null
           }
         </div>
