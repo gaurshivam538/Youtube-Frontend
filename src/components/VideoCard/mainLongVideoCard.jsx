@@ -12,8 +12,8 @@ import { IoReorderThreeSharp } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
 import { AiFillLike } from "react-icons/ai";
 import { AiFillDislike } from "react-icons/ai";
-import { useCallback } from "react";
 import {RedirectPopup} from "../index"
+import { useSelector } from "react-redux";
 
 
 
@@ -25,7 +25,8 @@ function MainLongVideoCard() {
   const progressRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const user = useCallback((state) => state.auth.userData);
+  const user = useSelector((state) => state.auth.userData);
+  // console.log(user.avatar)
 
   const [videoInfo, setVideoInfo] = useState({});
   const [isPlaying, setIsPlaying] = useState(false);
@@ -42,14 +43,29 @@ function MainLongVideoCard() {
   const [showPopup, setShowPopup] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(REDIRECT_DELAY);
 
+  
+
 
   useEffect(() => {
     if (!videoId) return;
 
     const fetchVideo = async () => {
-      const res = await getSpecificVideo(videoId);
-      setVideoInfo(res);
-      setCommentInfo(res.commentInfo);
+     try {
+       const res = await getSpecificVideo(videoId);
+       setVideoInfo(res);
+       setCommentInfo(res.commentInfo);
+     } catch (error) {
+        if (error.response.status === 401) {
+      videoRef.current.pause();
+
+      setShowPopup(true);
+
+      sessionStorage.setItem(
+        "postLoginRedirect",
+        location.pathname + location.search
+      );
+    }
+     }
 
     };
 
@@ -119,7 +135,6 @@ function MainLongVideoCard() {
     return () => clearInterval(interval);
   }, [showPopup, navigate]);
 
-  
 
   const togglePlay = () => {
     if (!user) {
@@ -131,6 +146,7 @@ function MainLongVideoCard() {
         "postLoginRedirect",
         location.pathname + location.search
       );
+      return;
     }
     if (!isPlaying) videoRef.current.play();
     else videoRef.current.pause();
@@ -168,14 +184,15 @@ function MainLongVideoCard() {
 
   const totalTime = timingFormat(videoInfo?.duration || 0);
 
-
+// console.log(user.owner)
   return (
     <div>
      { 
-     showPopup ? (<ProfilePopup
+     showPopup ? (<RedirectPopup
     open ={showPopup}
     onBack ={handleClose}
     onLogin ={handleLogin}
+    secondsLefts = {secondsLeft}
     />):( <div className="w-full bg-black text-white">
 
       {/* ================= VIDEO PLAYER ================= */}
@@ -359,9 +376,9 @@ function MainLongVideoCard() {
           <div className="flex gap-3 mb-4">
             <div className="w-9 h-9 rounded-full bg-gray-600" >
              {
-             videoInfo?.owner?.avatar && (<img
+             user?.avatar && (<img
               className="w-full h-full object-cover overflow-hidden rounded-full"
-              src={`${videoInfo.owner.avatar}`}
+              src={`${user.avatar}`}
               />)
              }
             </div>

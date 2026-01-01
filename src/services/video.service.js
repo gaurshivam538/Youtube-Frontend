@@ -37,6 +37,7 @@ const uploadVideo = async (title, description, videoFile, thumbnail, category, i
                     }
             },
         )
+        
         return response;
     } catch (error) {
         
@@ -45,12 +46,12 @@ const uploadVideo = async (title, description, videoFile, thumbnail, category, i
 
 const getSpecificVideo = async (videoId) => {
     try {
-        const response = await axios.get(`
+        const res = await axios.get(`
             /api/v1/users/get-specific-video/${videoId}`,
             { withCredentials: true },
         )
-        console.log(response.data.data[0]);
-        return response.data.data[0];
+        console.log(res.data.data[0]);
+        return res.data.data[0];
     } catch (error) {
         console.log("Error comes to fetch the video by id ", error);
         throw error;

@@ -1,20 +1,20 @@
 
 import React from 'react'
 
-const RedirectPopup = ([
-    open, onLogin, onBack, secondsLeft
-]) => {
+const RedirectPopup = ({
+    open, onLogin, onBack, secondsLefts}
+) => {
   return (
-    <div>
-     <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm pointer-events-auto" />
+    <div className=''>
+     <div className=" fixed inset-0 z-40 bg-black/50 backdrop-blur-sm pointer-events-auto bottom-0" />
 
       {/* ⬆️ Bottom Sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center">
+      <div className="fixed inset-x-0 bottom-[50%] z-50 flex justify-center">
         <div
           className="
             w-full max-w-md
             bg-neutral-900 text-white
-            rounded-t-2xl
+            rounded-2xl
             p-6
             animate-slideUp
           "
@@ -28,7 +28,7 @@ const RedirectPopup = ([
             <br />
             Redirecting in{" "}
             <span className="font-bold text-white">
-              {secondsLeft}s
+              {secondsLefts}s
             </span>
           </p>
 
