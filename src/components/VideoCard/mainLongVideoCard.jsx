@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import Hls from "hls.js";
 import { getSpecificVideo } from "../../services/video.service";
-import { Loader } from "../index";
+import { Loader, ProfilePopup } from "../index";
 import { timingFormat } from "./homeLongVideoCard";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
@@ -12,12 +12,20 @@ import { IoReorderThreeSharp } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
 import { AiFillLike } from "react-icons/ai";
 import { AiFillDislike } from "react-icons/ai";
+import { useCallback } from "react";
+import {RedirectPopup} from "../index"
 
 
 
+const REDIRECT_DELAY = 6; 
 function MainLongVideoCard() {
   const [params] = useSearchParams();
   const videoId = params.get("v");
+  const videoRef = useRef(null);
+  const progressRef = useRef(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const user = useCallback((state) => state.auth.userData);
 
   const [videoInfo, setVideoInfo] = useState({});
   const [isPlaying, setIsPlaying] = useState(false);
@@ -31,10 +39,8 @@ function MainLongVideoCard() {
   const [open, setOpen] = useState(false);
   const [like, setLike] = useState(false);
   const [dislike, setDisLike] = useState(false);
-
-
-  const videoRef = useRef(null);
-  const progressRef = useRef(null);
+  const [showPopup, setShowPopup] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(REDIRECT_DELAY);
 
 
   useEffect(() => {
@@ -94,13 +100,52 @@ function MainLongVideoCard() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!showPopup) return;
+
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          navigate("/login");
+          return 0;
+        }
+        return prev - 1;
+
+      })
+      
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [showPopup, navigate]);
+
+  
 
   const togglePlay = () => {
+    if (!user) {
+      videoRef.current.pause();
+
+      setShowPopup(true);
+
+      sessionStorage.setItem(
+        "postLoginRedirect",
+        location.pathname + location.search
+      );
+    }
     if (!isPlaying) videoRef.current.play();
     else videoRef.current.pause();
 
     setIsPlaying(!isPlaying);
   };
+
+  const handleClose = () =>{
+    sessionStorage.removeItem("postLoginRedirect");
+    navigate(-1);
+  }
+
+  const handleLogin = () => {
+    navigate("/login");
+  }
 
   const toggleVolume = () => {
     const muted = !videoRef.current.muted;
@@ -125,7 +170,13 @@ function MainLongVideoCard() {
 
 
   return (
-    <div className="w-full bg-black text-white">
+    <div>
+     { 
+     showPopup ? (<ProfilePopup
+    open ={showPopup}
+    onBack ={handleClose}
+    onLogin ={handleLogin}
+    />):( <div className="w-full bg-black text-white">
 
       {/* ================= VIDEO PLAYER ================= */}
       <div
@@ -359,8 +410,10 @@ function MainLongVideoCard() {
         </div>
 
       </div>
-    </div>
-
+    </div>)
+    
+   }
+</div>
   );
 }
 

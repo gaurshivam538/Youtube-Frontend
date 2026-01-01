@@ -5,9 +5,8 @@ import { Link } from "react-router-dom";
 import { Login as serviceLogin } from "../services/user.service"
 import { jwtDecode } from "jwt-decode";//access Token sa value niklna ka liya
 import { useDispatch } from "react-redux";
-import { login as authLogin } from "../store/auth.slice"
-import { useNavigate } from "react-router-dom";
-
+import { login as authLogin } from "../store/auth.slice";
+import { useNavigate, useLocation } from "react-router-dom";
 
 
 export default function Login() {
@@ -19,8 +18,14 @@ export default function Login() {
   } = useForm();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const location = useLocation();
   const login = (data) => {
+     const sessionRedirect =
+      sessionStorage.getItem("postLoginRedirect");
+      
+      const stateRedirect = location.state?.from;
+          const redirectTo =
+      sessionRedirect ||  "/";
 
     serviceLogin(data.email, data.password).then((result) => {
       reset();
@@ -28,11 +33,20 @@ export default function Login() {
       if (result.data.message === "Successs") {
 
         dispatch(authLogin(result.data.data.user));
-        navigate("/")
+
+        if(sessionRedirect) {
+          navigate(redirectTo)
+        }
+        
+        if (stateRedirect) {
+           navigate(stateRedirect, { replace: true });
+        }
+        
+        
       }
-      const token = result.data.data.accessToken
-      const decoded = jwtDecode(token);
-      console.log(decoded)
+      // const token = result.data.data.accessToken
+      // const decoded = jwtDecode(token);
+      // console.log(decoded);
       // console.log(decoded.email);
       // console.log(decoded.username);
       // console.log(decoded.fullName);

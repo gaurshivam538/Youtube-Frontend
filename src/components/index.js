@@ -9,6 +9,8 @@ import CreateMenu from "./CreatePopup"
 import UploadVideo from "./UploadVideo"
 import ProfilePopup from "./ProfilePopup"
 import Loader from "./Loader"
+import RedirectPopup from "./RedirectPopup"
+import ProtectedRoute from "./protectedRoute"
 export  {
     Logo,
     Input,
@@ -20,6 +22,8 @@ export  {
     UploadVideo,
     ProfilePopup,
     Loader,
+    RedirectPopup,
+    ProtectedRoute
 
 }
 

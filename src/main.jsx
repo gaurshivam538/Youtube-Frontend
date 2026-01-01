@@ -17,66 +17,73 @@ import UserDashboardPage from './components/pages/UserDashboard.jsx'
 import DashboardVideosPage from './components/DashboardComponenet/DashboardPages/DashboardVideosPage.jsx'
 import DashboardShortPage from './components/DashboardComponenet/DashboardPages/DashboardShortPage.jsx'
 import UploadedVideoAndAllVideo from './components/SpecificUserAllVideo/uploadedVideoAndAllVideo.jsx'
-
+import { ProtectedRoute } from './components/index.js'
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
       {
-        path:"/",
-        element:<HomePage/>
+        path: "/",
+        element: <HomePage />
       },
       {
         path: "/login",
-        element: <LoginPage/>
+        element: <LoginPage />
       },
       {
-        path:"/signup",
-        element:<SignupPage/>
+        path: "/signup",
+        element: <SignupPage />
       },
       {
         path: "/watch",
-        element:<MainLongVideoCard/>
+        element: <MainLongVideoCard />
       },
+
+      //  PROTECTED ROUTES START
       {
-        path:"/upload",
-        element:<UploadVideo/>
-      },
-      {
-        path: "/:username",
-        element: <UserDashboardPage/>,
+        element: <ProtectedRoute />,
         children: [
+
           {
-            index:true,
-            element: <DashboardHomePage/>
+            path: "/upload",
+            element: <UploadVideo />
           },
           {
-            path:"features",
-            element: <DashboardHomePage/>
+            path: "/:username",
+            element: <UserDashboardPage />,
+            children: [
+              {
+                index: true,
+                element: <DashboardHomePage />
+              },
+              {
+                path: "features",
+                element: <DashboardHomePage />
+              },
+              {
+                path: "videos",
+                element: <DashboardVideosPage />
+              },
+              {
+                path: "shorts",
+                element: <DashboardShortPage />
+              }
+            ]
           },
           {
-            path:"videos",
-            element: <DashboardVideosPage/>
-          },
-          {
-            path:"shorts",
-            element:<DashboardShortPage/>
+            path: "/getallfiles",
+            element: <UploadedVideoAndAllVideo />
           }
-
         ]
-      },
-      {
-        path:"/getallfiles",
-        element :<UploadedVideoAndAllVideo/>
       }
-
+      //  PROTECTED ROUTES END
     ]
   }
-])
+]);
 
 createRoot(document.getElementById('root')).render(
-      <Provider store={store}>
-       <RouterProvider router={router}/>
-      </Provider>
+  <Provider store={store}>
+    <RouterProvider router={router} />
+  </Provider>
 )
