@@ -50,7 +50,6 @@ const getSpecificVideo = async (videoId) => {
             /api/v1/users/get-specific-video/${videoId}`,
             { withCredentials: true },
         )
-        console.log(res.data.data[0]);
         return res.data.data[0];
     } catch (error) {
         console.log("Error comes to fetch the video by id ", error);
