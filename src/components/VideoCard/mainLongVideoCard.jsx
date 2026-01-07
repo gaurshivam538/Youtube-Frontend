@@ -12,6 +12,7 @@ import LikeAndDislike from "./VideoComponents/LikeAndDislike";
 import { toggleUserReaction, userReactionStatus } from "../../services/like.service";
 import Comment from "./VideoComponents/Comment";
 import { getAllCommentsSpecificVideo } from "../../services/comment.service";
+import socket from "../../Socket";
 
 
 const REDIRECT_DELAY = 6;
@@ -40,6 +41,7 @@ function MainLongVideoCard() {
   const [userReaction, setUserReaction] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(REDIRECT_DELAY);
+  const[replyedCommentInfo, setReplyedCommentInfo] = useState([]);
   /* ================= 1 VIDEO FETCH ================= */
   useEffect(() => {
     if (!videoId) return;
@@ -49,7 +51,7 @@ function MainLongVideoCard() {
         const res = await getSpecificVideo(videoId);
         console.log(res);
         setVideoInfo(res);
-        setCommentInfo(res.commentInfo);
+        // setCommentInfo(res.commentInfo);
       } catch (error) {
         if (error.response.status === 401) {
           videoRef.current.pause()
@@ -179,6 +181,13 @@ function MainLongVideoCard() {
        try {
         console.log(videoId)
         const res = await getAllCommentsSpecificVideo(videoId);
+        const notReplyedComment = res.filter((comment) => comment.parentComment == null);
+        const ReplyedComment = res.filter((comment) => comment.parentComment != null);
+        setCommentInfo(notReplyedComment);
+        setReplyedCommentInfo(ReplyedComment);
+        
+        // setCommentInfo(res);
+        console.log(res)
        } catch (error) {
         console.lof(error);
        }
@@ -186,10 +195,31 @@ function MainLongVideoCard() {
        fetchData();
 
    }, [videoId]);
+ 
+//===========Socket Connection===========//   
+   useEffect(() => {
+    if (!videoId) {
+      return;
+    }
+     socket.emit("join-video",videoId );
+     socket.on("newComment", (comment) => {
+      if (comment.video == videoId && comment.parentComment == null) {
+
+        setCommentInfo((prev) => [comment, ...prev])
+      }
+
+      if (comment.video == videoId && comment.parentComment != null) {
+
+        setReplyedCommentInfo((prev) => [comment, ...prev]);
+      }
+
+     });
+     return () => socket.off("newComment")
+
+   }, [videoId]);
 
   /* ================= 5 PLAY / PAUSE ================= */
   const togglePlay = () => {
-
     if (!user) {
       videoRef.current.pause();
       setShowPopup(true);
@@ -287,7 +317,6 @@ function MainLongVideoCard() {
 
     try {
       const res = await toggleUserReaction(videoId, reaction)
-      console.log(res);
     } catch (error) {
       console.log(error)
     }
@@ -451,6 +480,7 @@ function MainLongVideoCard() {
               user = {user}
               videoInfo = {videoInfo}
               commentInfo = {commentInfo}
+              replyedCommentInfo = {replyedCommentInfo}
               />
             </div>
 

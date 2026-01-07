@@ -1,19 +1,36 @@
 
 import axios from "axios";
 
-const addComment = async (content, videoId) => {
+const addCommentVideo = async (content, videoId) => {
     try {
 
-        if(!videoId) return;
+        if (!videoId) return;
 
-        const res = await axios.post(`/api/v1/users/add-comment/${videoId}`, 
-            { content},
-        {
-            withCredentials:true,
-        } )
+        const res = await axios.post(`/api/v1/users/add-comment/${videoId}`,
+            { content },
+            {
+                withCredentials: true,
+            })
         return res;
     } catch (error) {
         console.log(error)
+    }
+}
+
+const addCommentForSpecificComment = async (content, videoId, commentId) => {
+    try {
+        if (!videoId || !commentId) return;
+
+        const res = await axios.post(`/api/v1/users/add-comment/${videoId}`, {
+            content, commentId
+        },
+            {
+                withCredentials: true,
+            })
+
+            return res;
+    } catch (error) {
+        console.log(error);
     }
 }
 
@@ -22,16 +39,18 @@ const getAllCommentsSpecificVideo = async (videoId) => {
         console.log(videoId);
         const res = await axios.get(`/api/v1/users/get-video-comments/${videoId}`,
             {
-                withCredentials:true,
+                withCredentials: true,
             }
         )
-        console.log(res);
+       
+        return res?.data?.comments;
     } catch (error) {
         console.log(error)
     }
 }
 
 export {
-    addComment,
-    getAllCommentsSpecificVideo
+    addCommentVideo,
+    getAllCommentsSpecificVideo,
+    addCommentForSpecificComment
 }
