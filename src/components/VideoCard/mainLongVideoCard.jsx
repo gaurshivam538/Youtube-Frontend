@@ -187,7 +187,6 @@ function MainLongVideoCard() {
         setReplyedCommentInfo(ReplyedComment);
         
         // setCommentInfo(res);
-        console.log(res)
        } catch (error) {
         console.lof(error);
        }

@@ -4,6 +4,7 @@ import { IoReorderThreeSharp } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
 import { addCommentForSpecificComment, addCommentVideo } from '../../../services/comment.service';
 import { SlDislike, SlLike } from "react-icons/sl";
+import { AiFillDislike, AiFillLike } from "react-icons/ai";
 import { useEffect } from 'react';
 
 const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentInfo }) => {
@@ -14,13 +15,77 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
   const [replyCommentId, setReplyCommentId] = useState(null);
   const [videoId, setVideoId] = useState(null);
   const [openRepliesComment, setOpenRepliesComment] = useState(null);
+  const [commentReactions, setCommentReactions] = useState({});
 
-  //===========Set video id to the state=============//
+  // set video id
   useEffect(() => {
-    if (videoInfo) {
-      setVideoId(videoInfo._id);
-    }
+    if (videoInfo?._id) setVideoId(videoInfo._id);
   }, [videoInfo]);
+
+  // initialize reactions for comments
+  useEffect(() => {
+    const reactions = {};
+    // const hai=[];
+    commentInfo.forEach((c) => {
+      reactions[c._id] = {
+        like: false,
+        dislike: false,
+        likeCount: c.likes || 0,
+      };
+      // hai.push(reactions)
+    });
+    // console.log(hai)
+    setCommentReactions(reactions);
+  }, [commentInfo]);
+
+  // ✅ LIKE HANDLER
+  const toggleLike = (commentId) => {
+    setCommentReactions((prev) => {
+      const current = prev[commentId];
+
+      if (current.like) {
+
+        
+        return {
+          ...prev,
+          [commentId]: {
+            ...current,//Purani value save karo or fir overwrite karo
+            like: false,
+            likeCount: Math.max(current.likeCount - 1, 0),
+          },
+        };
+      }
+
+      return {
+        ...prev,
+        [commentId]: {
+          like: true,
+          dislike: false,
+          likeCount: current.likeCount + 1,
+        },
+      };
+    });
+  };
+
+  // ✅ DISLIKE HANDLER
+  const toggleDislike = (commentId) => {
+    setCommentReactions((prev) => {
+      const current = prev[commentId];
+
+      return {
+        ...prev,
+        [commentId]: {
+          ...current,
+          dislike: !current.dislike,
+          like: false,
+          likeCount: current.like
+            ? Math.max(current.likeCount - 1, 0)
+            : current.likeCount,
+        },
+      };
+    });
+  };
+
 
 
   const handleSubmit = async (e) => {
@@ -100,6 +165,7 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
 
       {/* Single comments */}
       {open && videoInfo?.owner && commentInfo.length > 0 && commentInfo.map((comment) => {
+        const reactions = commentReactions[comment._id];
         const replies = replyedCommentInfo.filter(
           r => r.parentComment === comment._id
         );
@@ -128,8 +194,24 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
 
                 {/* Comment actions */}
                 <div className='flex gap-8 mt-2 items-center'>
-                  <SlLike className="h-4 w-4 cursor-pointer" />
-                  <SlDislike className="h-4 w-4 cursor-pointer" />
+                  <div
+                      className="flex gap-1 items-center cursor-pointer"
+                      onClick={() => toggleLike(comment._id)}
+                    >
+                      {reactions?.like ? <AiFillLike /> : <SlLike />}
+                      {reactions?.likeCount}
+                    </div>
+
+                    <div
+                      className="cursor-pointer"
+                      onClick={() => toggleDislike(comment._id)}
+                    >
+                      {reactions?.dislike ? (
+                        <AiFillDislike />
+                      ) : (
+                        <SlDislike />
+                      )}
+                    </div>
                   <button onClick={() => setReplyCommentId(comment._id)}>Reply</button>
                 </div>
 
