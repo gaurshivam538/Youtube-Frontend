@@ -16,17 +16,17 @@ const toggleUserReaction = async (videoId, userReaction) => {
     }
 }
 
-const toggleUserReactionForComment = async (commentId, userReaction) => {
+const toggleUserReactionForComment = async (commentId,videoId, userReaction) => {
 
     if (!commentId) return;
 
     try {
         const res = await axios.post(`/api/v1/users/c/toggle-like/${commentId}`, {
-            userReaction,
-        }, 
-        {
+            userReaction,videoId,
             withCredentials: true,
-        })
+
+        }, 
+        )
 
         console.log(res);
         return res;
@@ -35,7 +35,7 @@ const toggleUserReactionForComment = async (commentId, userReaction) => {
     }
 }
 
-const userReactionStatus = async (videoId) => {
+const userVideoReactionStatus = async (videoId) => {
 
     try {
         const res = await axios.get(`/api/v1/users/v/get-status/${videoId}`,
@@ -49,7 +49,20 @@ const userReactionStatus = async (videoId) => {
     }
 }
 
+const userCommentReactionStatus = async(videoId) => {
+    try {
+        const res = await axios.get(`/api/v1/users/c/get-status/${videoId}`,{
+            withCredentials:true,
+        })
+        return res.data.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 export {
     toggleUserReaction,
-    userReactionStatus,
+    toggleUserReactionForComment,
+    userVideoReactionStatus,
+    userCommentReactionStatus
 }

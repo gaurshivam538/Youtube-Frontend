@@ -9,7 +9,7 @@ import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 import { RedirectPopup } from "../index"
 import { useSelector } from "react-redux";
 import LikeAndDislike from "./VideoComponents/LikeAndDislike";
-import { toggleUserReaction, userReactionStatus } from "../../services/like.service";
+import { toggleUserReaction, userVideoReactionStatus } from "../../services/like.service";
 import Comment from "./VideoComponents/Comment";
 import { getAllCommentsSpecificVideo } from "../../services/comment.service";
 import socket from "../../Socket";
@@ -147,7 +147,7 @@ function MainLongVideoCard() {
     if (!videoId) return;
     try {
       const fetchUserReaction = async () => {
-        const res = await userReactionStatus(videoId);
+        const res = await userVideoReactionStatus(videoId);
         setUserReaction(res);
 
       }
@@ -346,7 +346,7 @@ function MainLongVideoCard() {
               ref={videoRef}
               poster={videoInfo?.thumbnail}
               onTimeUpdate={handleTimeUpdate}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
 
             {isBuffering && (

@@ -6,6 +6,8 @@ import { addCommentForSpecificComment, addCommentVideo } from '../../../services
 import { SlDislike, SlLike } from "react-icons/sl";
 import { AiFillDislike, AiFillLike } from "react-icons/ai";
 import { useEffect } from 'react';
+import { toggleUserReactionForComment, userCommentReactionStatus } from '../../../services/like.service';
+import { useSelector } from 'react-redux';
 
 const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentInfo }) => {
 
@@ -16,36 +18,62 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
   const [videoId, setVideoId] = useState(null);
   const [openRepliesComment, setOpenRepliesComment] = useState(null);
   const [commentReactions, setCommentReactions] = useState({});
+  // const [replyCommentReaction, setReplyCommentReaction] = useState({});
 
   // set video id
   useEffect(() => {
     if (videoInfo?._id) setVideoId(videoInfo._id);
   }, [videoInfo]);
 
-  // initialize reactions for comments
+  const authStatus = useSelector((state) => state.auth.userData);
+  console.log("authStatus", authStatus);
+
+  //===============Fetch comment reaction status==========//
+
+
+
+  //============initialize reactions for comments============//
   useEffect(() => {
-    const reactions = {};
-    // const hai=[];
-    commentInfo.forEach((c) => {
-      reactions[c._id] = {
-        like: false,
-        dislike: false,
-        likeCount: c.likes || 0,
-      };
-      // hai.push(reactions)
-    });
-    // console.log(hai)
-    setCommentReactions(reactions);
-  }, [commentInfo]);
+    if (!commentInfo.length) return;
+
+    const fetchStatus = async () => {
+     
+        const res = await userCommentReactionStatus(videoId);
+     
+      const reactionMap = new Map(
+        res.map(r => [r._id, r.userReaction])
+      );
+
+      const reactions = {};
+      // const hai=[];
+      commentInfo.forEach((c) => {
+        const userreaction = reactionMap.get(c._id) || null
+        reactions[c._id] = {
+          like: userreaction === "like",
+          dislike: userreaction === "dislike",
+          likeCount: c.likes || 0,
+        };
+      });
+      replyedCommentInfo.forEach((c) => {
+        const userreaction = reactionMap.get(c._id) || null;
+        reactions[c._id] = {
+          like: userreaction === "like",
+          dislike: userreaction === "dislike",
+          likeCount: c.likes || 0,
+        };
+      })
+      setCommentReactions(reactions);
+    }
+    fetchStatus();
+  }, [commentInfo, videoId, replyedCommentInfo]);
 
   // ✅ LIKE HANDLER
-  const toggleLike = (commentId) => {
+  const toggleLike = async (commentId) => {
+    const reaction = "like";
     setCommentReactions((prev) => {
       const current = prev[commentId];
 
       if (current.like) {
-
-        
         return {
           ...prev,
           [commentId]: {
@@ -65,14 +93,22 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
         },
       };
     });
+
+    try {
+      await toggleUserReactionForComment(commentId, videoId, reaction);
+    } catch (error) {
+      console.log(error);
+    }
+
   };
 
   // ✅ DISLIKE HANDLER
-  const toggleDislike = (commentId) => {
+  const toggleDislike = async (commentId) => {
+    const reaction = "dislike";
     setCommentReactions((prev) => {
       const current = prev[commentId];
 
-      return {
+      const updateReaction = {
         ...prev,
         [commentId]: {
           ...current,
@@ -83,7 +119,15 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
             : current.likeCount,
         },
       };
+      return updateReaction;
+
     });
+
+    try {
+      await toggleUserReactionForComment(commentId, videoId, reaction);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
 
@@ -188,96 +232,119 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
                 {/* Comment content */}
                 <div className="flex justify-between">
                   <p className="text-sm font-medium">{comment.owner.username}</p>
-                  <BsThreeDotsVertical />
+                  <div>
+                  <BsThreeDotsVertical 
+                  
+                  />
+                  </div>
                 </div>
                 <p className="text-sm text-gray-300">{comment.content}</p>
 
                 {/* Comment actions */}
                 <div className='flex gap-8 mt-2 items-center'>
                   <div
-                      className="flex gap-1 items-center cursor-pointer"
-                      onClick={() => toggleLike(comment._id)}
-                    >
-                      {reactions?.like ? <AiFillLike /> : <SlLike />}
-                      {reactions?.likeCount}
-                    </div>
+                    className="flex gap-1 items-center cursor-pointer"
+                    onClick={() => toggleLike(comment._id)}
+                  >
+                    {reactions?.like ? <AiFillLike /> : <SlLike />}
+                    {reactions?.likeCount}
+                  </div>
 
-                    <div
-                      className="cursor-pointer"
-                      onClick={() => toggleDislike(comment._id)}
-                    >
-                      {reactions?.dislike ? (
-                        <AiFillDislike />
-                      ) : (
-                        <SlDislike />
-                      )}
-                    </div>
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => toggleDislike(comment._id)}
+                  >
+                    {reactions?.dislike ? (
+                      <AiFillDislike />
+                    ) : (
+                      <SlDislike />
+                    )}
+                  </div>
                   <button onClick={() => setReplyCommentId(comment._id)}>Reply</button>
                 </div>
 
                 {replies.length > 0 && openRepliesComment !== comment._id && (
-                   <div className='relative mt-3 mb-9'>
-                  <button
-                    className='absolute left-0  hover:rounded-3xl hover:bg-slate-900  p-2 text-white'
-                    onClick={() => setOpenRepliesComment(comment._id)}
-                  >
-                     {replies.length} reply
-                  </button>
+                  <div className='relative mt-3 mb-9'>
+                    <button
+                      className='absolute left-0  hover:rounded-3xl hover:bg-slate-900  p-2 text-white'
+                      onClick={() => setOpenRepliesComment(comment._id)}
+                    >
+                      {replies.length} reply
+                    </button>
                   </div>
                 )}
                 {
-                  openRepliesComment == comment._id && replyedCommentInfo.map((replyComment) => (
-                    <div key={replyComment._id}>
-                      {replyComment.parentComment === comment._id ? (
-                        <div className='flex gap-3 mt-2' key={replyComment._id}>
-                          <div className="w-9 h-9 rounded-full bg-gray-600">
-                            {replyComment?.owner?.avatar && (
-                              <img
-                                src={replyComment.owner.avatar}
-                                className="h-full w-full rounded-full object-cover"
-                                alt="comment owner"
-                              />
-                            )}
-                          </div>
-                          <div className='flex flex-col w-full'>
-                            <div className="flex justify-between">
-                              <p className="text-sm font-medium">{replyComment.owner.username}</p>
-                              <BsThreeDotsVertical />
+                  openRepliesComment == comment._id && replyedCommentInfo.map((replyComment) => {
+                    const replyReaction = commentReactions[replyComment._id];
+                    return (
+                      <div key={replyComment._id}>
+                        {replyComment.parentComment === comment._id ? (
+                          <div className='flex gap-3 mt-2' key={replyComment._id}>
+                            <div className="w-9 h-9 rounded-full bg-gray-600">
+                              {replyComment?.owner?.avatar && (
+                                <img
+                                  src={replyComment.owner.avatar}
+                                  className="h-full w-full rounded-full object-cover"
+                                  alt="comment owner"
+                                />
+                              )}
                             </div>
-                            <p className="text-sm text-gray-300">{replyComment.content}</p>
+                            <div className='flex flex-col w-full'>
+                              <div className="flex justify-between">
+                                <p className="text-sm font-medium">{replyComment.owner.username}</p>
+                                <BsThreeDotsVertical />
+                              </div>
+                              <p className="text-sm text-gray-300">{replyComment.content}</p>
 
-                            {/* Comment actions */}
-                            <div className='flex gap-8 mt-2 items-center'>
-                              <SlLike className="h-4 w-4 cursor-pointer" />
-                              <SlDislike className="h-4 w-4 cursor-pointer" />
-                              <button onClick={() => setReplyCommentId(replyComment._id)}>Reply</button>
+                              {/* Comment actions */}
+                              <div className='flex gap-8 mt-2 items-center'>
+                                <div
+                                  className="flex gap-1 items-center cursor-pointer"
+                                  onClick={() => toggleLike(replyComment._id)}
+                                >
+                                  {replyReaction?.like ? <AiFillLike /> : <SlLike />}
+                                  {replyReaction?.likeCount}
+                                </div>
+
+                                <div
+                                  className="cursor-pointer"
+                                  onClick={() => toggleDislike(replyComment._id)}
+                                >
+                                  {replyReaction?.dislike ? (
+                                    <AiFillDislike />
+                                  ) : (
+                                    <SlDislike />
+                                  )}
+                                </div>
+                                <button onClick={() => setReplyCommentId(replyComment._id)}>Reply</button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ) : null}
-                      {replyCommentId === replyComment._id && (
-                        <div className="mt-2 ml-12"> {/* Offset to align with comment text */}
-                          <ReplyComment
-                            commentId={replyComment._id}
-                            user={user}
-                            replyComment={replyComment}
-                            setReplyComment={setReplyComment}
-                            setReplyCommentId={setReplyCommentId}
-                            videoId={videoId}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))
+                        ) : null}
+                        {replyCommentId === replyComment._id && (
+                          <div className="mt-2 ml-12"> {/* Offset to align with comment text */}
+                            <ReplyComment
+                              commentId={replyComment._id}
+                              user={user}
+                              replyComment={replyComment}
+                              setReplyComment={setReplyComment}
+                              setReplyCommentId={setReplyCommentId}
+                              videoId={videoId}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })
                 }
-                { replies.length > 0 && openRepliesComment === comment._id && (
+                {replies.length > 0 && openRepliesComment === comment._id && (
                   <div className='relative m-4 mb-7'>
-                  <button
-                    className='absolute left-0  hover:rounded-3xl hover:bg-slate-900  p-2 text-white'
-                    onClick={() => setOpenRepliesComment(null)}
-                  >
-                    Hide replies
-                  </button>
+                    <button
+                      className='absolute left-0  hover:rounded-3xl hover:bg-slate-900  p-2 text-white'
+                      onClick={() => setOpenRepliesComment(null)}
+                    >
+                      Hide replies
+                    </button>
                   </div>
                 )}
 
