@@ -8,6 +8,9 @@ import { AiFillDislike, AiFillLike } from "react-icons/ai";
 import { useEffect } from 'react';
 import { toggleUserReactionForComment, userCommentReactionStatus } from '../../../services/like.service';
 import { useSelector } from 'react-redux';
+import { MdEdit } from "react-icons/md";
+import { RiDeleteBin5Line } from "react-icons/ri";
+import { FaRegFlag } from "react-icons/fa";
 
 const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentInfo }) => {
 
@@ -18,28 +21,22 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
   const [videoId, setVideoId] = useState(null);
   const [openRepliesComment, setOpenRepliesComment] = useState(null);
   const [commentReactions, setCommentReactions] = useState({});
-  // const [replyCommentReaction, setReplyCommentReaction] = useState({});
+  const [openCommentfunctionality, setOpenCommentfunctionality] = useState(null);
+  const authData = useSelector((state) => state.auth.userData);
 
-  // set video id
   useEffect(() => {
     if (videoInfo?._id) setVideoId(videoInfo._id);
-  }, [videoInfo]);
+  }, [videoInfo]); 
 
-  const authStatus = useSelector((state) => state.auth.userData);
-  console.log("authStatus", authStatus);
-
-  //===============Fetch comment reaction status==========//
-
-
-
+  
   //============initialize reactions for comments============//
   useEffect(() => {
     if (!commentInfo.length) return;
 
     const fetchStatus = async () => {
-     
-        const res = await userCommentReactionStatus(videoId);
-     
+
+      const res = await userCommentReactionStatus(videoId);
+
       const reactionMap = new Map(
         res.map(r => [r._id, r.userReaction])
       );
@@ -149,6 +146,13 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
     setSubmitButton(true);
   }
 
+  const handleShowCommnetFuntionalityPopup = (commentId) => {
+    
+    setOpenCommentfunctionality((prevId) =>
+    prevId === commentId ? null :commentId
+    )
+  }
+
   return (
     <div className='w-full'>
       {/* Header */}
@@ -232,10 +236,23 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
                 {/* Comment content */}
                 <div className="flex justify-between">
                   <p className="text-sm font-medium">{comment.owner.username}</p>
-                  <div>
-                  <BsThreeDotsVertical 
-                  
-                  />
+                  <div className="relative cursor-pointer">
+                    <BsThreeDotsVertical
+                      onClick={() => handleShowCommnetFuntionalityPopup(comment._id)}
+                    />
+                    {openCommentfunctionality === comment._id && (
+                      <div className='absolute top-1 p-2 bg-transparent rounded-md flex flex-col right-5 shadow-lg z-5 border border-slate-900'>
+                        { comment.owner. _id === authData._id ?(
+                          <>
+                          <div className='px-5 py-1 my-1 rounded-sm shadow-md flex gap-x-2 items-center'> <MdEdit /> <h1>Edit</h1></div>
+                            <div className='px-5 py-1 mb-1  rounded-sm shadow-md flex gap-x-2 items-center'> <RiDeleteBin5Line /><h1>Delete</h1></div>
+                            </>
+                        ) :(  <div className='px-5 py-1 mb-1  rounded-sm shadow-md flex gap-x-2 items-center'><FaRegFlag /><h1>Report</h1></div>)
+                         }
+
+                      </div>
+                    )}
+
                   </div>
                 </div>
                 <p className="text-sm text-gray-300">{comment.content}</p>

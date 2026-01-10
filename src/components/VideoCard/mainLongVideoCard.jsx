@@ -292,6 +292,33 @@ function MainLongVideoCard() {
     }
 
   };
+    const authStatus = useSelector((state) => state.auth.userData);
+  
+
+  //==============fetch====//
+
+  // useEffect(() => {
+  //  const ComapareData = () => {
+  //   if (commentInfo) {
+  //     commentInfo.map((comment) => {
+  //     if (comment.owner._id === authStatus._id) {
+  //       console.log("CommentInfo Owner find")
+  //     };
+  //   })
+  //   }
+    
+  //   if (replyedCommentInfo) {
+  //      replyedCommentInfo.map((comment)=> {
+  //     if (comment.owner._id === authStatus._id) {
+  //       console.log("ReplyCommment id")
+  //     }
+  //   })
+  //   }
+   
+  //  }
+
+  //  ComapareData();
+  // }, [videoId, commentInfo, replyedCommentInfo]);
   
 
   const toggleDislike = async () => {
