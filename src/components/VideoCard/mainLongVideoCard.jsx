@@ -49,7 +49,6 @@ function MainLongVideoCard() {
     const fetchVideo = async () => {
       try {
         const res = await getSpecificVideo(videoId);
-        console.log(res);
         setVideoInfo(res);
         // setCommentInfo(res.commentInfo);
       } catch (error) {
@@ -181,8 +180,10 @@ function MainLongVideoCard() {
        try {
         console.log(videoId)
         const res = await getAllCommentsSpecificVideo(videoId);
-        const notReplyedComment = res.filter((comment) => comment.parentComment == null);
-        const ReplyedComment = res.filter((comment) => comment.parentComment != null);
+        const notReplyedComment = res.filter((comment) => comment.parentComment === null);
+        const ReplyedComment = res.filter((comment) => comment.parentComment !== null);
+        console.log("NotreplyComment", notReplyedComment);
+        console.log("replyedComment" , ReplyedComment);
         setCommentInfo(notReplyedComment);
         setReplyedCommentInfo(ReplyedComment);
         
@@ -292,34 +293,9 @@ function MainLongVideoCard() {
     }
 
   };
-    const authStatus = useSelector((state) => state.auth.userData);
+  
   
 
-  //==============fetch====//
-
-  // useEffect(() => {
-  //  const ComapareData = () => {
-  //   if (commentInfo) {
-  //     commentInfo.map((comment) => {
-  //     if (comment.owner._id === authStatus._id) {
-  //       console.log("CommentInfo Owner find")
-  //     };
-  //   })
-  //   }
-    
-  //   if (replyedCommentInfo) {
-  //      replyedCommentInfo.map((comment)=> {
-  //     if (comment.owner._id === authStatus._id) {
-  //       console.log("ReplyCommment id")
-  //     }
-  //   })
-  //   }
-   
-  //  }
-
-  //  ComapareData();
-  // }, [videoId, commentInfo, replyedCommentInfo]);
-  
 
   const toggleDislike = async () => {
     const reaction = "dislike";
@@ -506,7 +482,9 @@ function MainLongVideoCard() {
               user = {user}
               videoInfo = {videoInfo}
               commentInfo = {commentInfo}
+              setCommentInfo ={setCommentInfo}
               replyedCommentInfo = {replyedCommentInfo}
+              setReplyedCommentInfo = {setReplyedCommentInfo}
               />
             </div>
 

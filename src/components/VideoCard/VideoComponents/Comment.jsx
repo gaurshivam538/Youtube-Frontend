@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { IoReorderThreeSharp } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
-import { addCommentForSpecificComment, addCommentVideo } from '../../../services/comment.service';
+import { addCommentForSpecificComment, addCommentVideo, deleteComment } from '../../../services/comment.service';
 import { SlDislike, SlLike } from "react-icons/sl";
 import { AiFillDislike, AiFillLike } from "react-icons/ai";
 import { useEffect } from 'react';
@@ -11,12 +11,13 @@ import { useSelector } from 'react-redux';
 import { MdEdit } from "react-icons/md";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { FaRegFlag } from "react-icons/fa";
+import socket from "../../../Socket"
 
-const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentInfo }) => {
+const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentInfo, setReplyedCommentInfo, setCommentInfo }) => {
 
   const [comment, setComment] = useState("");
   const [submitButton, setSubmitButton] = useState(false);
-  const [replyComment, setReplyComment] = useState("");
+  const [replyCommentContent, setReplyCommentContent] = useState("");
   const [replyCommentId, setReplyCommentId] = useState(null);
   const [videoId, setVideoId] = useState(null);
   const [openRepliesComment, setOpenRepliesComment] = useState(null);
@@ -26,9 +27,9 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
 
   useEffect(() => {
     if (videoInfo?._id) setVideoId(videoInfo._id);
-  }, [videoInfo]); 
+  }, [videoInfo]);
 
-  
+
   //============initialize reactions for comments============//
   useEffect(() => {
     if (!commentInfo.length) return;
@@ -147,11 +148,63 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
   }
 
   const handleShowCommnetFuntionalityPopup = (commentId) => {
-    
+
     setOpenCommentfunctionality((prevId) =>
-    prevId === commentId ? null :commentId
+      prevId === commentId ? null : commentId
     )
   }
+
+  const handleDelete = async (comId) => {
+    try {
+      const res = await deleteComment(comId, videoId);
+      console.log(res);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+
+    if (!videoId) {
+      return;
+    }
+
+    socket.on("hard-delete-comment", (deletedCommentId) => {
+
+      setCommentInfo(prev =>
+        prev.filter(c => c._id !== deletedCommentId)
+      );
+
+      setReplyedCommentInfo(prev =>
+        prev.filter(
+          c =>
+            c._id !== deletedCommentId &&
+            c.parentComment !== deletedCommentId
+        )
+      );
+    });
+
+
+    return () => socket.off("hard-delete-comment")
+  }, [videoId]);
+
+  useEffect(() => {
+
+    if (!videoId) {
+      return;
+    }
+
+    socket.on("soft-delete-comment", ({ commentId, content, isDeleted }) => {
+      setCommentInfo((prev) =>
+        prev.map((c) => c._id === commentId ? { ...c, content, isDeleted } : c)
+      );
+      setReplyedCommentInfo((prev) =>
+        prev.map((c) => c._id === commentId ? { ...c, content, isDeleted } : c)
+      );
+    });
+
+    return () => socket.off("soft-delete-comment")
+  }, [videoId]);
 
   return (
     <div className='w-full'>
@@ -213,6 +266,8 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
 
       {/* Single comments */}
       {open && videoInfo?.owner && commentInfo.length > 0 && commentInfo.map((comment) => {
+        const isCommentOwner = comment?.owner?._id === authData?._id;
+        const isVideoOwner = videoInfo?.owner?._id === authData?._id;
         const reactions = commentReactions[comment._id];
         const replies = replyedCommentInfo.filter(
           r => r.parentComment === comment._id
@@ -236,49 +291,83 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
                 {/* Comment content */}
                 <div className="flex justify-between">
                   <p className="text-sm font-medium">{comment.owner.username}</p>
-                  <div className="relative cursor-pointer">
-                    <BsThreeDotsVertical
-                      onClick={() => handleShowCommnetFuntionalityPopup(comment._id)}
-                    />
-                    {openCommentfunctionality === comment._id && (
-                      <div className='absolute top-1 p-2 bg-transparent rounded-md flex flex-col right-5 shadow-lg z-5 border border-slate-900'>
-                        { comment.owner. _id === authData._id ?(
-                          <>
-                          <div className='px-5 py-1 my-1 rounded-sm shadow-md flex gap-x-2 items-center'> <MdEdit /> <h1>Edit</h1></div>
-                            <div className='px-5 py-1 mb-1  rounded-sm shadow-md flex gap-x-2 items-center'> <RiDeleteBin5Line /><h1>Delete</h1></div>
-                            </>
-                        ) :(  <div className='px-5 py-1 mb-1  rounded-sm shadow-md flex gap-x-2 items-center'><FaRegFlag /><h1>Report</h1></div>)
-                         }
+                  {
+                    (!comment.isDeleted) || (comment.isDeleted && isVideoOwner) ? (<div className="relative cursor-pointer">
+                      <BsThreeDotsVertical
+                        onClick={() => handleShowCommnetFuntionalityPopup(comment._id)}
+                      />
+                      {openCommentfunctionality === comment._id &&
 
-                      </div>
-                    )}
+                        (
+                          <div className='absolute top-1 p-2 bg-transparent rounded-md flex flex-col right-5 shadow-lg z-5 border border-slate-900'>
+                            {
+                              isVideoOwner && (
+                                <>
+                                  <div className='px-5 py-1 my-1 rounded-sm shadow-md flex gap-x-2 items-center'> <MdEdit /> <h1>Edit</h1></div>
+                                  <div className='px-5 py-1 mb-1  rounded-sm shadow-md flex gap-x-2 items-center'> <RiDeleteBin5Line />
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault();  // 
+                                        handleDelete(comment._id);
+                                        handleShowCommnetFuntionalityPopup(comment._id);
+                                      }}
+                                    >Delete</button>
+                                  </div>
+                                  <div className='px-5 py-1 mb-1  rounded-md shadow-md flex gap-x-2 items-center'><FaRegFlag /><h1>Report</h1></div>
+                                </>
+                              )
+                            }
+                            {!isVideoOwner && isCommentOwner && (
+                              <>
+                                <div className='px-5 py-1 my-1 rounded-sm shadow-md flex gap-x-2 items-center'> <MdEdit /> <h1>Edit</h1></div>
+                                <div className='px-5 py-1 mb-1  rounded-sm shadow-md flex gap-x-2 items-center'> <RiDeleteBin5Line />
+                                  <button
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handleShowCommnetFuntionalityPopup(comment._id)
+                                      handleDelete(comment._id)
+                                    }}
+                                  >Delete</button>
+                                </div>
+                              </>
+                            )}{!isVideoOwner && !isCommentOwner && (<div className='px-5 py-1 mb-1  rounded-md shadow-md flex gap-x-2 items-center'><FaRegFlag /><h1>Report</h1></div>)}
 
-                  </div>
+                          </div>
+                        )}
+
+                    </div>) : null
+                  }
+
                 </div>
                 <p className="text-sm text-gray-300">{comment.content}</p>
 
                 {/* Comment actions */}
-                <div className='flex gap-8 mt-2 items-center'>
-                  <div
-                    className="flex gap-1 items-center cursor-pointer"
-                    onClick={() => toggleLike(comment._id)}
-                  >
-                    {reactions?.like ? <AiFillLike /> : <SlLike />}
-                    {reactions?.likeCount}
-                  </div>
+                {
+                  !comment.isDeleted && (
+                    <div className='flex gap-8 mt-2 items-center'>
+                      <div
+                        className="flex gap-1 items-center cursor-pointer"
+                        onClick={() => toggleLike(comment._id)}
+                      >
+                        {reactions?.like ? <AiFillLike /> : <SlLike />}
+                        {reactions?.likeCount}
+                      </div>
 
-                  <div
-                    className="cursor-pointer"
-                    onClick={() => toggleDislike(comment._id)}
-                  >
-                    {reactions?.dislike ? (
-                      <AiFillDislike />
-                    ) : (
-                      <SlDislike />
-                    )}
-                  </div>
-                  <button onClick={() => setReplyCommentId(comment._id)}>Reply</button>
-                </div>
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => toggleDislike(comment._id)}
+                      >
+                        {reactions?.dislike ? (
+                          <AiFillDislike />
+                        ) : (
+                          <SlDislike />
+                        )}
+                      </div>
+                      <button onClick={() => setReplyCommentId(comment._id)}>Reply</button>
+                    </div>
+                  )
+                }
+
 
                 {replies.length > 0 && openRepliesComment !== comment._id && (
                   <div className='relative mt-3 mb-9'>
@@ -293,6 +382,7 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
                 {
                   openRepliesComment == comment._id && replyedCommentInfo.map((replyComment) => {
                     const replyReaction = commentReactions[replyComment._id];
+                    const isReplyCommentOwner = replyComment?.owner?._id === authData?._id;
                     return (
                       <div key={replyComment._id}>
                         {replyComment.parentComment === comment._id ? (
@@ -309,7 +399,53 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
                             <div className='flex flex-col w-full'>
                               <div className="flex justify-between">
                                 <p className="text-sm font-medium">{replyComment.owner.username}</p>
-                                <BsThreeDotsVertical />
+                                {
+                                  (!replyComment.isDeleted) || (replyComment.isDeleted && isVideoOwner) ? (
+                                    <div className="relative cursor-pointer">
+                                      <BsThreeDotsVertical
+                                        onClick={() => handleShowCommnetFuntionalityPopup(replyComment._id)}
+                                      />
+                                      {openCommentfunctionality === replyComment._id &&
+
+                                        (
+                                          <div className='absolute top-1 p-2 bg-transparent rounded-md flex flex-col right-5 shadow-lg z-5 border border-slate-900'>
+                                            {
+                                              isVideoOwner && (
+                                                <>
+                                                  <div className='px-5 py-1 my-1 rounded-sm shadow-md flex gap-x-2 items-center'> <MdEdit /> <h1>Edit</h1></div>
+                                                  <div className='px-5 py-1 mb-1  rounded-sm shadow-md flex gap-x-2 items-center'> <RiDeleteBin5Line />
+                                                    <button
+                                                      onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handleShowCommnetFuntionalityPopup(replyComment._id)
+                                                        handleDelete(replyComment._id)
+                                                      }}
+                                                    >Delete</button>
+                                                  </div>
+                                                  <div className='px-5 py-1 mb-1  rounded-md shadow-md flex gap-x-2 items-center'><FaRegFlag /><h1>Report</h1></div>
+                                                </>
+                                              )
+                                            }
+                                            {!isVideoOwner && isReplyCommentOwner && (
+                                              <>
+                                                <div className='px-5 py-1 my-1 rounded-sm shadow-md flex gap-x-2 items-center'> <MdEdit /> <h1>Edit</h1></div>
+                                                <div className='px-5 py-1 mb-1  rounded-sm shadow-md flex gap-x-2 items-center'> <RiDeleteBin5Line />
+                                                  <button
+                                                    onClick={(e) => {
+                                                      e.preventDefault();
+                                                      handleShowCommnetFuntionalityPopup(replyComment._id)
+                                                      handleDelete(replyComment._id)
+                                                    }}
+                                                  >Delete</button>
+                                                </div>
+                                              </>
+                                            )}{!isVideoOwner && !isReplyCommentOwner && (<div className='px-5 py-1 mb-1  rounded-md shadow-md flex gap-x-2 items-center'><FaRegFlag /><h1>Report</h1></div>)}
+                                          </div>
+                                        )}
+                                    </div>
+                                  ) : null
+                                }
+
                               </div>
                               <p className="text-sm text-gray-300">{replyComment.content}</p>
 
@@ -335,6 +471,32 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
                                 </div>
                                 <button onClick={() => setReplyCommentId(replyComment._id)}>Reply</button>
                               </div>
+                              {
+                                replyedCommentInfo.map((replykereply) => {
+
+                                  return (
+                                    <>
+                                      {
+                                        replykereply.parentComment === replyComment._id && (
+                                          <div
+                                            key={replykereply._id}
+                                          >
+                                            <div className="w-9 h-9 rounded-full bg-gray-600">
+                                              {replykereply?.owner?.avatar && (
+                                                <img
+                                                  src={replykereply.owner.avatar}
+                                                  className="h-full w-full rounded-full object-cover"
+                                                  alt="comment owner"
+                                                />
+                                              )}
+                                            </div>
+                                          </div>
+                                        )
+                                      }
+                                    </>
+                                  )
+                                })
+                              }
                             </div>
                           </div>
                         ) : null}
@@ -343,8 +505,8 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
                             <ReplyComment
                               commentId={replyComment._id}
                               user={user}
-                              replyComment={replyComment}
-                              setReplyComment={setReplyComment}
+                              replyCommentContent={replyCommentContent}
+                              setReplyCommentContent={setReplyCommentContent}
                               setReplyCommentId={setReplyCommentId}
                               videoId={videoId}
                             />
@@ -374,8 +536,8 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
                 <ReplyComment
                   commentId={comment._id}
                   user={user}
-                  replyComment={replyComment}
-                  setReplyComment={setReplyComment}
+                  replyCommentContent={replyCommentContent}
+                  setReplyCommentContent={setReplyCommentContent}
                   setReplyCommentId={setReplyCommentId}
                   videoId={videoId}
                 />
@@ -395,21 +557,20 @@ export default Comment;
 
 
 // ReplyComment component
-const ReplyComment = ({ commentId, user, replyComment, setReplyComment, setReplyCommentId, videoId }) => {
+const ReplyComment = ({ commentId, user, replyCommentContent, setReplyCommentContent, setReplyCommentId, videoId }) => {
 
   const handleReplySubmit = async (e) => {
     e.preventDefault();
-    if (!replyComment.trim()) return;
 
     // Replace with your API call to submit a reply
     try {
-      const res = await addCommentForSpecificComment(replyComment, videoId, commentId)
+      const res = await addCommentForSpecificComment(replyCommentContent, videoId, commentId)
       console.log(res);
     } catch (error) {
       console.log(error)
     }
 
-    setReplyComment(""); // Clear input
+    setReplyCommentContent(""); // Clear input
     setReplyCommentId(null); // Close reply box
   }
 
@@ -428,8 +589,8 @@ const ReplyComment = ({ commentId, user, replyComment, setReplyComment, setReply
         <input
           className="flex-1 bg-transparent border-b border-gray-600 outline-none text-sm w-full"
           placeholder="Add a reply..."
-          value={replyComment}
-          onChange={(e) => setReplyComment(e.target.value)}
+          value={replyCommentContent}
+          onChange={(e) => setReplyCommentContent(e.target.value)}
         />
         <div className='flex gap-6 mt-2'>
           <input

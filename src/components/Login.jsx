@@ -36,11 +36,14 @@ export default function Login() {
 
         if(sessionRedirect) {
           navigate(redirectTo)
+          return;
         }
         
         if (stateRedirect) {
            navigate(stateRedirect, { replace: true });
+           return;
         }
+        navigate("/");
         
         
       }
