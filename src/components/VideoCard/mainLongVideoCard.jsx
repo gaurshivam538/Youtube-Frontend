@@ -325,7 +325,6 @@ function MainLongVideoCard() {
 
   };
 
-
   return (
     <div>
       {
