@@ -10,6 +10,7 @@ import { MdEdit } from "react-icons/md";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { FaRegFlag } from "react-icons/fa";
 import socket from "../../../Socket";
+import { userCommentReactionStatus, toggleUserReactionForComment } from '../../../services/like.service';
 
 // Main Comment Component
 const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentInfo, setReplyedCommentInfo, setCommentInfo }) => {
@@ -22,7 +23,9 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
   const [commentReactions, setCommentReactions] = useState({});
   const [openCommentfunctionality, setOpenCommentfunctionality] = useState(null);
   const authData = useSelector((state) => state.auth.userData);
+  const [openRepliesComent, setOpenRepliesComment] = useState({});
 
+ 
   useEffect(() => {
     if (videoInfo?._id) setVideoId(videoInfo._id);
   }, [videoInfo]);
@@ -58,11 +61,75 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
     };
     fetchStatus();
   }, [commentInfo, videoId, replyedCommentInfo]);
+  const toggleLike = async (commentId) => {
+    const reaction = "like";
+    setCommentReactions((prev) => {
+      const current = prev[commentId];
+      if (current.like) {
+        return {
+          ...prev,
+          [commentId]: {
+            ...current,//Purani value save karo or fir overwrite karo
+            like: false,
+            likeCount: Math.max(current.likeCount - 1, 0),
+          },
+        };
+      }
+
+      return {
+        ...prev,
+        [commentId]: {
+          like: true,
+          dislike: false,
+          likeCount: current.likeCount + 1,
+        },
+      };
+    });
+
+    try {
+      await toggleUserReactionForComment(commentId, videoId, reaction);
+    } catch (error) {
+      console.log(error);
+    }
+
+  };
+
+  // ✅ DISLIKE HANDLER
+  const toggleDislike = async (commentId) => {
+    const reaction = "dislike";
+    setCommentReactions((prev) => {
+      const current = prev[commentId];
+
+      const updateReaction = {
+        ...prev,
+        [commentId]: {
+          ...current,
+          dislike: !current.dislike,
+          like: false,
+          likeCount: current.like
+            ? Math.max(current.likeCount - 1, 0)
+            : current.likeCount,
+        },
+      };
+      return updateReaction;
+
+    });
+
+    try {
+      await toggleUserReactionForComment(commentId, videoId, reaction);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
 
   // Handle comment submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!comment.trim()) return;
+    if (comment.trim().length === 0) {
+      alert("Please input the more then one value i can not submit your comment");
+      return;
+    }
 
     try {
       await addCommentVideo(comment, videoId);
@@ -70,6 +137,8 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
       console.log(error);
     }
     setComment("");
+    setSubmitButton(false);
+    
   };
 
   const handleSubmitButton = () => {
@@ -112,9 +181,15 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
     return () => socket.off("soft-delete-comment");
   }, [videoId]);
 
+  const toggleReplies = (commentId) => {
+  setOpenRepliesComment(prev => ({
+    ...prev,
+    [commentId]: !prev[commentId], // toggle open/close
+  }));
+};
+
   // Recursive function to render replies
   const renderReplies = (replies) => {
-    console.log(replies);
     return replies.map((reply) => {
       const isReplyOwner = reply?.owner?._id === authData?._id;
       const reactions = commentReactions[reply._id];
@@ -185,9 +260,42 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
                 </div>
                 <button onClick={() => setReplyCommentId(reply._id)}>Reply</button>
               </div>
+ {
+                    replyCommentId === reply._id && (
+                      <ReplyComment
+                        commentId={reply._id}
+                        user={user}
+                        replyCommentContent={replyCommentContent}
+                        setReplyCommentContent={setReplyCommentContent}
+                        setReplyCommentId={setReplyCommentId}
+                        videoId={videoId}
+                      />
+                    )
+                  }
+                   
+                  {/* Recursively render replies */}
+                  { openRepliesComent[reply._id] && replyReplies.length > 0 && renderReplies(replyReplies)}
+                  {
+                      !openRepliesComent[reply._id] && replyReplies.length > 0 && (
+                      <div className='flex gap-3 hover:bg-slate-900 p-2 hover:rounded-full max-w-fit'>
+                        <h1>{replyReplies.length}</h1>
+                        <button
+                        className=''
+                        onClick={() => toggleReplies(reply._id)}
+                        >reply</button>
+                      </div>
+                    )
+                  }
 
-              {/* Recursively render replies to this reply */}
-              {replyReplies.length > 0 && renderReplies(replyReplies)}
+                  {
+                    openRepliesComent[reply._id] && replyReplies.length > 0 && (
+                      <button
+                      className='flex  hover:bg-slate-900 p-2 hover:rounded-full max-w-fit'
+                      onClick={() => toggleReplies(reply._id)}>
+                        Hide replies
+                      </button>
+                    )
+                  }
             </div>
           </div>
         </div>
@@ -221,10 +329,14 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
             placeholder="Add a comment..."
             value={comment}
             onChange={(e) => setComment(e.target.value)}
+            onClick={handleSubmitButton}
           />
           {submitButton && (
             <div className="flex gap-6 mt-4">
-              <input className="bg-blue-300 rounded-3xl max-w-fit px-4 cursor-pointer" value="Add" type="submit" />
+              {comment.length > 0 && (
+  <input className="bg-blue-300 rounded-3xl max-w-fit px-4 cursor-pointer" value="Add" type="submit" />
+              )}
+            
               <button type="button" onClick={() => setSubmitButton(false)} className="max-w-fit p-2 bg-slate-800 border border-gray-200 rounded-lg">
                 Cancel
               </button>
@@ -239,7 +351,7 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
           const isCommentOwner = comment?.owner?._id === authData?._id;
           const reactions = commentReactions[comment._id];
           const replies = replyedCommentInfo.filter((r) => r.parentComment === comment._id);
-          
+
           return (
             <div key={comment._id} className="mb-3">
               <div className="flex gap-3">
@@ -292,9 +404,43 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
                     </div>
                     <button onClick={() => setReplyCommentId(comment._id)}>Reply</button>
                   </div>
-
+                 
+                  {
+                    replyCommentId === comment._id && (
+                      <ReplyComment
+                        commentId={comment._id}
+                        user={user}
+                        replyCommentContent={replyCommentContent}
+                        setReplyCommentContent={setReplyCommentContent}
+                        setReplyCommentId={setReplyCommentId}
+                        videoId={videoId}
+                      />
+                    )
+                  }
+                   
                   {/* Recursively render replies */}
-                  {replies.length > 0 && renderReplies(replies)}
+                  { openRepliesComent[comment._id] && replies.length > 0 && renderReplies(replies)}
+                  {
+                       !openRepliesComent[comment._id] && replies.length > 0 && (
+                      <div className='flex gap-3 hover:bg-slate-900 p-2 hover:rounded-full max-w-fit'>
+                        <h1>{getTotalRepliesCount(comment?._id, replyedCommentInfo )}</h1>
+                        <button
+                        className=''
+                        onClick={() => toggleReplies(comment._id)}
+                        >reply</button>
+                      </div>
+                    )
+                  }
+
+                  {
+                    openRepliesComent[comment._id] && replies.length > 0 && (
+                      <button
+                      className='flex  hover:bg-slate-900 p-2 hover:rounded-full max-w-fit'
+                      onClick={() => toggleReplies(comment._id)}>
+                        Hide replies
+                      </button>
+                    )
+                  }
                 </div>
               </div>
             </div>
@@ -313,6 +459,11 @@ const ReplyComment = ({ commentId, user, replyCommentContent, setReplyCommentCon
     e.preventDefault();
 
     // Replace with your API call to submit a reply
+    if (replyCommentContent.trim().length === 0) {
+      console.log("Please fill the more then one word thn submit the reply")
+      alert("Please input  one word and more then one word");
+      return;
+    }
     try {
       const res = await addCommentForSpecificComment(replyCommentContent, videoId, commentId);
       console.log(res);
@@ -343,11 +494,16 @@ const ReplyComment = ({ commentId, user, replyCommentContent, setReplyCommentCon
           onChange={(e) => setReplyCommentContent(e.target.value)}
         />
         <div className="flex gap-6 mt-2">
-          <input
+          {
+            replyCommentContent.length >0 && (
+               <input
             className="bg-blue-300 rounded-3xl max-w-fit px-4 cursor-pointer"
             value="Add"
             type="submit"
           />
+            )
+          }
+         
           <button
             type="button"
             onClick={() => setReplyCommentId(null)}
@@ -360,3 +516,18 @@ const ReplyComment = ({ commentId, user, replyCommentContent, setReplyCommentCon
     </form>
   );
 };
+
+
+const getTotalRepliesCount = (parentId, allReplies) => {
+  
+  const directReplies = allReplies.filter((c) => c.parentComment === parentId);
+
+  let count = directReplies.length;
+
+  directReplies.forEach((reply) => 
+  count+=getTotalRepliesCount(reply._id, directReplies)
+
+  );
+
+  return count;
+}
