@@ -48,6 +48,24 @@ const deleteComment = async(commentId, videoId) => {
         console.log(error)
     }
 }
+const updateComment = async(content, commentId, videoId) => {
+    try {
+
+        if (!commentId && !videoId) {
+            console.log("CommentId and VideoId is required");
+            return;
+        }
+        
+        const res = await axios.patch(`/api/v1/users/update-comment/${commentId}`,
+            {content, videoId},
+            {withCredentials: true},
+        )
+        console.log(res);
+        return res;
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 
 const getAllCommentsSpecificVideo = async (videoId) => {
@@ -69,5 +87,6 @@ export {
     addCommentVideo,
     getAllCommentsSpecificVideo,
     addCommentForSpecificComment,
-    deleteComment
+    deleteComment,
+    updateComment
 }
