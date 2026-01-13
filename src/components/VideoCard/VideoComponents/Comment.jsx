@@ -525,7 +525,7 @@ const getTotalRepliesCount = (parentId, allReplies) => {
   let count = directReplies.length;
 
   directReplies.forEach((reply) => 
-  count+=getTotalRepliesCount(reply._id, directReplies)
+  count += getTotalRepliesCount(reply._id, allReplies)
 
   );
 
