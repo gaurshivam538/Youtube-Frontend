@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { SignUp as serviceSignup, Login as serviceLogin } from "../services/user.service";
 import { useSelector, useDispatch } from "react-redux";
 import {login} from "../store/auth.slice"
+import { useGoogleLogin } from "@react-oauth/google";
 
 export default function Signup() {
     const {
@@ -26,6 +27,24 @@ export default function Signup() {
             navigate("/");
        
     };
+
+    const handleSuccess = async (authResult) => {
+        console.log(authResult);
+        try {
+            if (authResult.code) {
+                // await
+            }
+        } catch (error) {
+            
+        }
+    } 
+    const googleLogin = useGoogleLogin({
+        onSuccess: handleSuccess,
+        onError: handleSuccess,
+        flow: 'auth-code'
+    })
+
+    
 
 
     return (
@@ -139,6 +158,8 @@ export default function Signup() {
                         Sign Up
                     </Button>
                 </form>
+
+                <button onClick={googleLogin}>Continue With Google</button>
             </div>
         </div>
     );
