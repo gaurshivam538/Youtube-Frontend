@@ -11,6 +11,7 @@ import ProfilePopup from "./ProfilePopup"
 import Loader from "./Loader"
 import RedirectPopup from "./RedirectPopup"
 import ProtectedRoute from "./protectedRoute"
+import ForgotPassword from "./forgotPassword"
 export  {
     Logo,
     Input,
@@ -23,7 +24,8 @@ export  {
     ProfilePopup,
     Loader,
     RedirectPopup,
-    ProtectedRoute
+    ProtectedRoute,
+    ForgotPassword
 
 }
 

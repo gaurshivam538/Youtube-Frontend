@@ -3,7 +3,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { Input, Button, Logo } from "./index";
 import { Link, useNavigate } from "react-router-dom";
-import { SignUp as serviceSignup, Login as serviceLogin } from "../services/user.service";
+import { SignUp as serviceSignup, Login as serviceLogin, googleSignup, afterSignupRedirectlogin } from "../services/user.service";
 import { useSelector, useDispatch } from "react-redux";
 import {login} from "../store/auth.slice"
 import { useGoogleLogin } from "@react-oauth/google";
@@ -32,7 +32,18 @@ export default function Signup() {
         console.log(authResult);
         try {
             if (authResult.code) {
-                // await
+                const res = await googleSignup(authResult?.code);
+                console.log("SignUp Data =>",res);
+                if (res.data.statusCode === 201) {
+                    const loginRes = await afterSignupRedirectlogin(res?.data?.data?.email);
+                    dispatch(login(loginRes?.data?.data));
+                    navigate("/")
+                }
+
+                if (res.data.statusCode === 200) {
+                    navigate("/login")
+                }
+                
             }
         } catch (error) {
             
@@ -48,8 +59,8 @@ export default function Signup() {
 
 
     return (
-        <div className="flex items-center justify-center w-full min-h-screen bg-gray-50">
-            <div className="mx-auto w-full max-w-lg bg-gray-100 rounded-xl p-10 border border-black/10 shadow-lg">
+        <div className="w-full flex flex-col items-center mt-8 ">
+            <div className="mx-auto w-full max-w-lg  rounded-xl p-10 border border-black/10 shadow-lg">
                 <div className="mb-4 flex justify-center">
                     <span className="inline-block w-full max-w-[100px]">
                         <Logo />
@@ -158,9 +169,13 @@ export default function Signup() {
                         Sign Up
                     </Button>
                 </form>
-
-                <button onClick={googleLogin}>Continue With Google</button>
+             
             </div>
+<div className="h-[2px] mx-auto max-w-lg w-full mt-4 bg-slate-500 "></div>
+   <button 
+   className="mt-4  border border-blue-100 rounded-lg shadow-md  max-w-lg w-full t bg-transparent  p-2 "
+   onClick={googleLogin}>Continue With Google</button>
+
         </div>
     );
 }

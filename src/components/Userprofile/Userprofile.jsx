@@ -6,9 +6,9 @@ import { Userprofile as serviceUserprofile } from '../../services/user.service';
 import { useState } from 'react';
 
 function Userprofile() {
-    const authStatus = useSelector((state) => state.auth.status)
+    const authStatus = useSelector((state) => state.auth.status);
     const [profileUrl, setprofileUrl] = useState(null);
-    useEffect( ()=>{
+    useEffect( () => {
         const fetchProfile = async () => {
              if (authStatus) {
                  const response = await serviceUserprofile();

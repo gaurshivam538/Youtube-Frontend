@@ -10,7 +10,6 @@ const SignUp = async (username, email, fullName, password, avatar) => {
                 headers: { "Content-Type": "multipart/form-data" }
             }
         )
-
         return response;
     } catch (error) {
         console.log("Signup error:", error.response?.data || error.message)
@@ -18,9 +17,63 @@ const SignUp = async (username, email, fullName, password, avatar) => {
 
 }
 
+const googleSignup = async (code) => {
+    if (!code) {
+        console.log("Code can not provide code is required..");
+    }
+    try {
+       const res = await axios.post(`/api/v1/users/google-register`, {
+        code
+       },
+       {
+        headers: {"Content-Type": "application/json"}
+       }
+    
+    ) 
+    return res;
+
+    } catch (error) {
+       console.log(error); 
+    }
+}
+
+const googleLogin = async (code) => {
+    try {
+        const res = await axios.post(`/api/v1/users/google-login`,
+            {
+                code
+            },
+        )
+
+        return res;
+        
+    } catch (error) {
+        console.log("Error for googleLogin",error);
+    }
+}
+
+const afterSignupRedirectlogin = async(email) => {
+    try {
+        if (!email) {
+            console.log("Email cannot provide");
+        }
+
+        const res = await axios.post(`/api/v1/users/after-googlesignup-rediretlogin`,
+            {
+                email
+            }
+        )
+
+        console.log(res);
+        return res;
+        
+    } catch (error) {
+        console.log("Error for redirectiongooglelogin", error)
+    }
+}
+
 const Login = async (email, password) => {
     try {
-        console.log("Service page",email,password)
         const response = await axios.post(`/api/v1/users/login`,
             { email, password },
             { withCredentials: true },
@@ -86,4 +139,7 @@ export {
     Logout,
     Userprofile,
     userDashboard,
+    googleSignup,
+    googleLogin,
+    afterSignupRedirectlogin
 }
