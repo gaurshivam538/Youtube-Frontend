@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input, Button, Logo } from "./index";
 import { Link } from "react-router-dom";
-import { Login as serviceLogin } from "../services/user.service"
+import { forgotPassword, Login as serviceLogin } from "../services/user.service"
 import { jwtDecode } from "jwt-decode";//access Token sa value niklna ka liya
 import { useDispatch } from "react-redux";
 import { login as authLogin } from "../store/auth.slice";
@@ -104,7 +104,8 @@ export default function Login() {
 
   const handleForgetPassword = async () => {
     const emailVal = getValues("email");
-    const otpVal = "123456"
+    const res = await forgotPassword(emailVal);
+    const otpVal = res.data.data;
     dispatch(setEmail(emailVal));
     dispatch(setOtp(otpVal));
   }

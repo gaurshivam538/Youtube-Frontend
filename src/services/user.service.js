@@ -133,6 +133,63 @@ const userDashboard = async (username) => {
     
 }
 
+const forgotPassword = async (email) => {
+    if (!email) {
+        console.log("email can not provided ")
+        return
+    }
+    try {
+       
+        const res = await axios.post(`api/v1/users/forgot-password`,
+            {
+                email
+            }
+        );
+        console.log("Forgot-password-data", res);
+        return res;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const verifyOtp = async(email, otp) => {
+    if (!email || !otp) {
+        console.log("Email and otp is required for the vefification")
+        return;
+    }
+
+    try {
+        const res = await axios.post(`/api/v1/users/verify-otp`,
+            {
+                email, otp
+            }
+        );
+
+        return res;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const updatePassword = async (email, password) => {
+    if (!email || !password) {
+        console.log("Email and password is required");
+        return;
+    }
+
+    try {
+        const res = await axios.patch("/api/v1/users/update-password",
+            {
+                email, password
+            }
+        );
+
+        return res;  
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 export {
     SignUp,
     Login,
@@ -141,5 +198,8 @@ export {
     userDashboard,
     googleSignup,
     googleLogin,
-    afterSignupRedirectlogin
+    afterSignupRedirectlogin,
+    forgotPassword,
+    verifyOtp,
+    updatePassword
 }

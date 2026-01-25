@@ -1,32 +1,62 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useRef } from "react";
+import { useSelector } from "react-redux";
+import { verifyOtp } from "../services/user.service";
+import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]); 
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const inputRefs = useRef([]);
   const email = useSelector((state) => state.email.emaildata);
-  const storedOtp = useSelector((state) => state.email.otpdata);
-  console.log("Email =>",email, "otp =>", storedOtp)
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchOtp = async () => {
-      try {
-       
-        const otpFromBackend = "123456"; 
-        setOtp(otpFromBackend.split(''));  // Split OTP into an array to autofill
-      } catch (error) {
-        console.error('Error fetching OTP:', error);
-      } 
-    };
-    fetchOtp();
-  }, []);
+  // Handle input change
+  const handleChange = (e, index) => {
+    const value = e.target.value;
 
-  
-  const handleSubmit = () => {
-    const otpValue = otp.join("");  // Join OTP array to form a single string
-    if (otpValue === storedOtp) {  // Replace with actual OTP validation
-      alert("OTP Verified Successfully!");
-    } else {
+    if (!/^\d*$/.test(value)) return; // Allow only digits
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    // Move focus to next input if a digit is entered
+    if (value && index < otp.length - 1) {
+      inputRefs.current[index + 1].focus();
+    }
+  };
+
+  // Handle key down for backspace
+const handleKeyDown = (e, index) => {
+  if (e.key === "Backspace") {
+    const newOtp = [...otp];
+
+    if (otp[index] !== "") {
+      // agar current input mein value hai → usko delete karo
+      newOtp[index] = "";
+      setOtp(newOtp);
+    } else if (index > 0) {
+      // agar current empty hai → previous input clear karo aur focus karo
+      newOtp[index - 1] = "";
+      setOtp(newOtp);
+      inputRefs.current[index - 1].focus();
+    }
+  }
+};
+
+
+  const handleSubmit = async () => {
+    const otpValue = otp.join("");
+    console.log("OTP submitted:", otpValue);
+
+    try {
+      const res = await verifyOtp(email, otpValue);
+      if (res.data.statusCode === 200) {
+        alert("OTP Verified Successfully!");
+        navigate("/update-password");
+      }
+    } catch (error) {
       alert("Invalid OTP. Please try again.");
+      console.log(error);
     }
   };
 
@@ -34,17 +64,18 @@ const ForgotPassword = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-semibold text-center mb-6">Enter OTP</h2>
-        {/* {loading && <p>Loading OTP...</p>}  Show loading message while fetching OTP */}
         <div className="flex space-x-4 justify-center mb-6">
           {otp.map((digit, index) => (
             <input
               key={index}
-              id={`otp-input-${index}`}
+              ref={(el) => (inputRefs.current[index] = el)}
               type="text"
               maxLength="1"
               value={digit}
+              onChange={(e) => handleChange(e, index)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
               className="w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-              autoFocus={index === 5}  
+              autoFocus={index === 0}
             />
           ))}
         </div>
