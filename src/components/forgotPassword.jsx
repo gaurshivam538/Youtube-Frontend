@@ -4,8 +4,7 @@ import { forgotPassword, verifyOtp } from "../services/user.service";
 import { useNavigate } from "react-router-dom";
 import { timingFormat } from "./VideoCard/homeLongVideoCard";
 import { useDispatch } from "react-redux";
-import { resetOtp } from "../store/emailsave.slice";
-import { setOtp as storeSetOtp,resetOtp } from "../store/emailsave.slice";
+import { setOtp as storeSetOtp, resetOtp, setVerifyUser } from "../store/emailsave.slice";
 
 const ForgotPassword = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -87,6 +86,7 @@ const ForgotPassword = () => {
       const res = await verifyOtp(email, otpValue);
       if (res.data.statusCode === 200) {
         alert("OTP Verified Successfully!");
+        dispatch(setVerifyUser());
         dispatch(resetOtp());
         navigate("/update-password");
       }

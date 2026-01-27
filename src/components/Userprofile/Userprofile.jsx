@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Userprofile as serviceUserprofile } from '../../services/user.service';
+import { generateNewAccessToken, Userprofile as serviceUserprofile } from '../../services/user.service';
 import { useState } from 'react';
 
 function Userprofile() {
@@ -11,8 +11,18 @@ function Userprofile() {
     useEffect( () => {
         const fetchProfile = async () => {
              if (authStatus) {
-                 const response = await serviceUserprofile();
-                 const userImageUrl = response.data.data.userImage;//First data userServicesProvide 
+                 const res = await serviceUserprofile();
+                //  console.log(res?.response?.data);
+                //  if (res?.response?.data?.data === "Unauthorized request, Token created") {
+                //     console.log("hai")
+                //    const res2 =  await generateNewAccessToken();
+
+                //    if (res2?.response?.data?.statusCode === 201) {
+                //     const res3 = await serviceUserprofile();
+                //     setprofileUrl(res3?.data?.data?.userImage);
+                //    }
+                //  }
+                 const userImageUrl = res?.data?.data?.userImage;//First data userServicesProvide 
                  setprofileUrl(userImageUrl);
 
         }

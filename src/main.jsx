@@ -19,7 +19,7 @@ import UserDashboardPage from './components/pages/UserDashboard.jsx'
 import DashboardVideosPage from './components/DashboardComponenet/DashboardPages/DashboardVideosPage.jsx'
 import DashboardShortPage from './components/DashboardComponenet/DashboardPages/DashboardShortPage.jsx'
 import UploadedVideoAndAllVideo from './components/SpecificUserAllVideo/uploadedVideoAndAllVideo.jsx'
-import { ProtectedRoute ,ForgotPassword, UpdatePassword} from './components/index.js'
+import { ProtectedRoute ,ForgotPassword, UpdatePassword, UpdatePasswordPageProtectedRoute} from './components/index.js'
 const router = createBrowserRouter([
   {
     path: "/",
@@ -38,8 +38,13 @@ const router = createBrowserRouter([
        element: <ForgotPassword/>
       },
       {
-        path: "/update-password",
-        element: <UpdatePassword/>
+        element:<UpdatePasswordPageProtectedRoute/>,
+        children: [
+          {
+            path: "/update-password",
+            element: <UpdatePassword/>
+          }
+        ]
       },
       {
         path: "/signup",

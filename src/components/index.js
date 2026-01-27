@@ -13,6 +13,7 @@ import RedirectPopup from "./RedirectPopup"
 import ProtectedRoute from "./protectedRoute"
 import ForgotPassword from "./forgotPassword"
 import UpdatePassword from "./updatePassword"
+import UpdatePasswordPageProtectedRoute from "./UpdatePasswordPageProtectedRoute"
 export  {
     Logo,
     Input,
@@ -28,6 +29,7 @@ export  {
     ProtectedRoute,
     ForgotPassword,
     UpdatePassword,
+    UpdatePasswordPageProtectedRoute,
 
 }
 

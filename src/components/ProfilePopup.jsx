@@ -3,22 +3,30 @@ import React from 'react'
 import { useRef } from 'react'
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Userprofile as serviceUserprofile } from '../services/user.service';
+import { generateNewAccessToken, Userprofile as serviceUserprofile } from '../services/user.service';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 const ProfilePopup = () => {
     const [open, setopen] = useState(false);
     const authStatus = useSelector((state) => state.auth.status)
-    console.log(authStatus)
     const [userInfo, setUserInfo] = useState({});
     const menuRef = useRef();
 
     useEffect(() => {
         const fetchUserData = async () => {
-            const response = await serviceUserprofile();
+            const res = await serviceUserprofile();
+                            //  console.log(res);
+                            //  if (res?.response?.data?.data === "Unauthorized request, Token created") {
+                            //     console.log("hai")
+                            //    const res2 =  await generateNewAccessToken();
             
-            setUserInfo(response.data.data);
+                            //    if (res2?.response?.data?.statusCode === 201) {
+                            //     const res3 = await serviceUserprofile();
+                            //     setUserInfo(res3?.data?.data);
+                            //    }
+                            //  }
+            setUserInfo(res?.data?.data);
         }
         fetchUserData();
     }, [authStatus]);

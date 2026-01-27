@@ -3,7 +3,7 @@ import {Input, Button} from "./index"
 import { updatePassword as serviceUpdatePassword} from "../services/user.service"
 import { useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { login } from "../store/auth.slice"
+import { resetEmail, resetVerifyUser } from "../store/emailsave.slice"
 
 export default function UpdatePassword() {
     const {
@@ -14,6 +14,7 @@ export default function UpdatePassword() {
     } = useForm();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+ 
 
 
     const updatePassword = async (data) =>{
@@ -24,7 +25,8 @@ export default function UpdatePassword() {
                 alert("Please Write a same email then you are updating the take the otp then written this email")
             }
             if (res?.data?.statusCode === 200) {
-                // dispatch(login(res?.data?.data));
+                dispatch(resetEmail());
+                dispatch(resetVerifyUser())
                 navigate("/login");
             }
         } catch (error) {

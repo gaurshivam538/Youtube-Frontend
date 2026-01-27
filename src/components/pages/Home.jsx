@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { getAllVideos } from '../../services/video.service';
 import {HomeLongVideoCard} from '../VideoCard/homeLongVideoCard';
 import HomeShortVideoCard from '../VideoCard/homeShortVideoCard';
+import { useSelector } from 'react-redux';
 
 function HomePage() {
   const [videoInfo, setVideoInfo] = useState([]);
   const [shortVideoInfo, setshortVideoInfo] = useState([]);
   const [longVideoInfo, setlongVideoInfo] = useState([]);
   const [loading, setLoading] = useState(true);
+     const userData = useSelector((state) => state.auth.userData);
+    console.log(userData)
   useEffect(() => {
   const fetchVideoInfo = async () => {
     try {
