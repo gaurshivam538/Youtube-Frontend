@@ -4,7 +4,6 @@ const initialState = {
     emailStatus:false,
     otpStatus:false,
     emaildata:null,
-    otpdata:null
 };
 
 const emailSlice = createSlice({
@@ -17,11 +16,9 @@ const emailSlice = createSlice({
         },
         setOtp: (state, action) => {
             state.otpStatus = true;
-            state.otpdata = action.payload;
         },
         resetOtp: (state, action) => {
             state.otpStatus = false;
-            state.otpdata = null;
         },
         resetEmail: (state, action) => {
             state.emailStatus = false;

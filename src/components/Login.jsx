@@ -104,10 +104,21 @@ export default function Login() {
 
   const handleForgetPassword = async () => {
     const emailVal = getValues("email");
-    const res = await forgotPassword(emailVal);
-    const otpVal = res.data.data;
-    dispatch(setEmail(emailVal));
-    dispatch(setOtp(otpVal));
+   try {
+     const res = await forgotPassword(emailVal);
+
+     if (res?.response?.data?.data === "User not found. Please sign up first") {
+      alert("Yopu are not registed to this email please firstregister and then use service...");
+     }
+     if (res?.data?.statusCode === 200) {
+       dispatch(setEmail(emailVal));
+       dispatch(setOtp());
+     }
+   } catch (error) {
+    console.log(error);
+    
+   }
+
   }
 
   return (
@@ -156,7 +167,7 @@ export default function Login() {
             })}
           />
           <div
-          className="flex flex-col ">
+            className="flex flex-col ">
             <Input
               lable="Password"
               placeholder="Enter your password"
@@ -173,14 +184,14 @@ export default function Login() {
               })}
             />
             <Link
-            to ="/forgot-password"
+              to="/forgot-password"
             >
-            <button
-              className="hover:underline hover:text-blue-600  ml-72 "
-              onClick={handleForgetPassword}
+              <button
+                className="hover:underline hover:text-blue-600  ml-72 "
+                onClick={handleForgetPassword}
               >
-              Forgot password
-            </button>
+                Forgot password
+              </button>
             </Link>
           </div>
 

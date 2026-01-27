@@ -20,12 +20,15 @@ export default function UpdatePassword() {
         try {
             const res = await serviceUpdatePassword(data?.email, data?.password)
             console.log(res);
+            if (res?.response?.status === 401) {
+                alert("Please Write a same email then you are updating the take the otp then written this email")
+            }
             if (res?.data?.statusCode === 200) {
-                dispatch(login(res?.data?.data));
+                // dispatch(login(res?.data?.data));
                 navigate("/login");
             }
         } catch (error) {
-            
+            console.log("Error",error);
         }
     }
 

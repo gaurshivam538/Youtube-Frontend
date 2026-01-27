@@ -145,10 +145,9 @@ const forgotPassword = async (email) => {
                 email
             }
         );
-        console.log("Forgot-password-data", res);
         return res;
     } catch (error) {
-        console.log(error)
+        return error;
     }
 }
 
@@ -181,12 +180,15 @@ const updatePassword = async (email, password) => {
         const res = await axios.patch("/api/v1/users/update-password",
             {
                 email, password
+            },
+             {
+                withCredentials:true,
             }
         );
 
         return res;  
     } catch (error) {
-        console.log(error)
+       return error;
     }
 }
 
