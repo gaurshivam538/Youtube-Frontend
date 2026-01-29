@@ -1,22 +1,44 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useMatch, useParams } from 'react-router-dom';
-import { userDashboard } from '../../services/user.service';
+import { generateNewAccessToken, userDashboard } from '../../services/user.service';
 import { FaSearch } from "react-icons/fa";
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../../store/auth.slice';
+
 const Dashboard = () => {
   const { username } = useParams()
   const [userInfo, setuserInfo] = useState({})
-  
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchData = async () => {
-      const response = await userDashboard(username);
-      if (!response) {
+      let res = await userDashboard(username);
+      if (res?.response?.data?.data === "Unauthorized request, Token created") {
+        const res2 = await generateNewAccessToken();
+        if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+          alert("Your refresh Token expiry, please Login and useSpecific services");
+          dispatch(logout());
+          navigate("/login");
+          return;
+        }
+        if (res2?.data?.message === "Access Token is created SuccessFully") {
+          const res3 = await userDashboard(username);
+          res = res3;
+          
+          return;
+        }
+      }
+      if (!res) {
         console.log("No API Response Received");
         return;
       }
-      if (response.status == 200) {
-        setuserInfo(response.data.data)
+      if (res?.status == 200) {
+        setuserInfo(res?.data?.data)
         // console.log(response.data.data)
+        return;
       }
 
     }
@@ -25,9 +47,9 @@ const Dashboard = () => {
   }, [username]);
 
   const homeMatch = useMatch(`/${username}`);//match the url value 
-const featuresMatch = useMatch(`/${username}/features`);
+  const featuresMatch = useMatch(`/${username}/features`);
 
-const isHomeActive = homeMatch || featuresMatch;
+  const isHomeActive = homeMatch || featuresMatch;
   return (
     <div className=' w-[100%] mx-auto h-full'>
       {/* User Info */}
@@ -73,7 +95,7 @@ const isHomeActive = homeMatch || featuresMatch;
       <div className='flex w-[85%] h-[5%] mx-auto items-center gap-x-8 mt-6 text-lg font-bold text-gray-500'>
         <div className=''>
           <NavLink
-           to={`/${username}/features`}
+            to={`/${username}/features`}
             className={
               `relative cursor-pointer after:absolute after:left-0 after:-bottom-4 
      after:h-[3px] after:bg-black after:transition-all
@@ -86,7 +108,7 @@ const isHomeActive = homeMatch || featuresMatch;
         </div>
         <div>
           <NavLink
-             to={`/${username}/videos`}
+            to={`/${username}/videos`}
             className={({ isActive }) =>
               `relative cursor-pointer after:absolute after:left-0 after:-bottom-4 
      after:h-[3px] after:bg-black after:transition-all
@@ -97,7 +119,7 @@ const isHomeActive = homeMatch || featuresMatch;
           </NavLink>
         </div>
         <NavLink
-         to={`/${username}/shorts`}
+          to={`/${username}/shorts`}
           className={({ isActive }) =>
             `relative cursor-pointer after:absolute after:left-0 after:-bottom-4 
      after:h-[3px] after:bg-black after:transition-all
@@ -123,9 +145,9 @@ const isHomeActive = homeMatch || featuresMatch;
         </div>
       </div>
       <div className='h-[1px] bg-gray-300 w-[95%] mx-auto mt-4'></div>
-       <div className='w-[85%] mx-auto h-full'>
-    <Outlet/>
-    </div>
+      <div className='w-[85%] mx-auto h-full'>
+        <Outlet />
+      </div>
     </div>
   );
 }

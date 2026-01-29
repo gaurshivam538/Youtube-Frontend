@@ -12,6 +12,7 @@ const toggleUserReaction = async (videoId, userReaction) => {
         );
         return res
     } catch (error) {
+        return error
 
     }
 }
@@ -32,6 +33,8 @@ const toggleUserReactionForComment = async (commentId,videoId, userReaction) => 
         return res;
     } catch (error) {
         console.log(error);
+        return error
+
     }
 }
 
@@ -46,6 +49,8 @@ const userVideoReactionStatus = async (videoId) => {
         return res?.data?.data;
     } catch (error) {
         console.log(error);
+        return error
+
     }
 }
 
@@ -57,6 +62,8 @@ const userCommentReactionStatus = async(videoId) => {
         return res.data.data;
     } catch (error) {
         console.log(error)
+        return error
+
     }
 }
 

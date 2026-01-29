@@ -1,32 +1,43 @@
 
 import React from 'react'
 import { useRef } from 'react'
-import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { Link ,useNavigate} from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import { generateNewAccessToken, Userprofile as serviceUserprofile } from '../services/user.service';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import {logout} from "../components/../store/auth.slice"
 
 const ProfilePopup = () => {
     const [open, setopen] = useState(false);
     const authStatus = useSelector((state) => state.auth.status)
     const [userInfo, setUserInfo] = useState({});
     const menuRef = useRef();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUserData = async () => {
+
             const res = await serviceUserprofile();
-                            //  console.log(res);
-                            //  if (res?.response?.data?.data === "Unauthorized request, Token created") {
-                            //     console.log("hai")
-                            //    const res2 =  await generateNewAccessToken();
-            
-                            //    if (res2?.response?.data?.statusCode === 201) {
-                            //     const res3 = await serviceUserprofile();
-                            //     setUserInfo(res3?.data?.data);
-                            //    }
-                            //  }
+            if (res?.response?.data?.data === "Unauthorized request, Token created") {
+                console.log(res?.response?.data?.data)
+                const res2 = await generateNewAccessToken();
+                if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+                    alert("Your refresh Token expiry, please Login and useSpecific services");
+                    dispatch(logout());
+                    navigate("/login");
+                    return;
+                }
+                if (res2?.data?.message === "Access Token is created SuccessFully") {
+                    const res3 = await serviceUserprofile();
+                    console.log(res3)
+                    setUserInfo(res3?.data?.data);
+                    return;
+                }
+            }
             setUserInfo(res?.data?.data);
+
         }
         fetchUserData();
     }, [authStatus]);
@@ -51,9 +62,9 @@ const ProfilePopup = () => {
             <button
                 onClick={() => setopen(!open)}
                 className='overflow-hidden rounded-full h-8 w-8 object-cover cursor-pointer'
-                >
+            >
                 <img
-                    src={`${userInfo.userImage}`}
+                    src={`${userInfo?.userImage}`}
                     className='overflow-hidden'
                 />
 
@@ -64,7 +75,7 @@ const ProfilePopup = () => {
                         <div className='flex gap-x-3 items-center'>
                             <div className=' h-10 w-10 rounded-full overflow-hidden object-cover'>
                                 <img
-                                    src={`${userInfo.userImage}`}
+                                    src={`${userInfo?.userImage}`}
                                     className='overflow-hidden'
                                 />
                             </div>
@@ -80,7 +91,7 @@ const ProfilePopup = () => {
                         <div className='ml-12 mt-1 cursor-pointer'>
                             <Link to={`/${userInfo.username}`} className='text-blue-600 
                             '
-                            onClick={() => setopen(!open)}
+                                onClick={() => setopen(!open)}
                             >
                                 View your channel
                             </Link>

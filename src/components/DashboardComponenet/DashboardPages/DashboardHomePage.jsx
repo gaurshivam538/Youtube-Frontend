@@ -1,25 +1,44 @@
 import React, { useEffect, useState } from 'react'
 import Dashboard from '../Dashboard'
-import { useParams } from 'react-router-dom'
-import { userDashboard } from '../../../services/user.service'
+import { useParams, useNavigate } from 'react-router-dom'
+import { generateNewAccessToken, userDashboard } from '../../../services/user.service'
 import DashboardForYouPortion from '../DashboardForYouPortion'
 import DashboardVideoPortion from '../DashboardVideoPortion'
 import { SiYoutubeshorts } from 'react-icons/si'
 import DashboardShortPortion from '../DashboardShortPortion'
+import { useDispatch } from 'react-redux'
+import { logout } from '../../../store/auth.slice'
 const DashboardHomePage = () => {
   const { username } = useParams()
-  const [userInfo, setuserInfo] = useState({})
+  const [userInfo, setuserInfo] = useState({});
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await userDashboard(username);
-      if (!response) {
+      let res = await userDashboard(username);
+      if (res?.response?.data?.data === "Unauthorized request, Token created") {
+        const res2 = await generateNewAccessToken();
+        if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+          alert("Your refresh Token expiry, please Login and useSpecific services");
+          dispatch(logout());
+          navigate("/login");
+          return;
+        }
+        if (res2?.data?.message === "Access Token is created SuccessFully") {
+          const res3 = await userDashboard(username);
+          res = res3;
+
+          return;
+        }
+      }
+      if (!res) {
         console.log("No API Response Received");
         return;
       }
-      if (response.status == 200) {
-        setuserInfo(response.data.data)
-        console.log(response.data.data)
+      if (res?.status == 200) {
+        setuserInfo(res?.data?.data)
+        return;
       }
 
     }

@@ -15,6 +15,9 @@ import { FaChevronDown } from "react-icons/fa";
 import { FaChevronUp } from "react-icons/fa";
 import ReplyComment from './ReplyComment';
 import EditComment from './EditComent';
+import { generateNewAccessToken } from '../../../services/user.service';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../../store/auth.slice';
 
 // Main Comment Component
 const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentInfo, setReplyedCommentInfo, setCommentInfo }) => {
@@ -31,6 +34,7 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
   const [editCommentId, setEditCommentId] = useState(null);
   const [editCommentContent, setEditCommentContent] = useState(null);
   const isVideoOwner = videoInfo?.owner?._id === authData?._id;
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (videoInfo?._id) setVideoId(videoInfo._id);
@@ -41,7 +45,21 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
     if (!commentInfo.length) return;
 
     const fetchStatus = async () => {
-      const res = await userCommentReactionStatus(videoId);
+      let res = await userCommentReactionStatus(videoId);
+         if (res?.response?.data?.data === "Unauthorized request, Token created") {
+                let res2 = await generateNewAccessToken();
+                if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+                  alert("Your refresh Token expiry, please Login and useSpecific services");
+                  dispatch(logout());
+                  navigate("/login");
+                  return;
+                }
+                if (res2?.data?.message === "Access Token is created SuccessFully") {
+                  const res3 = await userCommentReactionStatus(videoId);
+                  res = res3;
+                  return;
+                }
+              }
       const reactionMap = new Map(res.map(r => [r._id, r.userReaction]));
       const reactions = {};
 
@@ -67,6 +85,8 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
     };
     fetchStatus();
   }, [commentInfo, videoId, replyedCommentInfo]);
+
+
   const toggleLike = async (commentId) => {
     const reaction = "like";
     setCommentReactions((prev) => {
@@ -93,7 +113,22 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
     });
 
     try {
-      await toggleUserReactionForComment(commentId, videoId, reaction);
+      const res = await toggleUserReactionForComment(commentId, videoId, reaction);
+       if (res?.response?.data?.data === "Unauthorized request, Token created") {
+                      const res2 = await generateNewAccessToken();
+                      if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+                          alert("Your refresh Token expiry, please Login and useSpecific services");
+                          dispatch(logout());
+                          navigate("/login");
+                          return;
+                      }
+                      if (res2?.data?.message === "Access Token is created SuccessFully") {
+                           await toggleUserReactionForComment(commentId, videoId, reaction);
+                         
+                          return;
+                      }
+                  }
+     
     } catch (error) {
       console.log(error);
     }
@@ -122,7 +157,22 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
     });
 
     try {
-      await toggleUserReactionForComment(commentId, videoId, reaction);
+      const res = await toggleUserReactionForComment(commentId, videoId, reaction);
+        if (res?.response?.data?.data === "Unauthorized request, Token created") {
+                      const res2 = await generateNewAccessToken();
+                      if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+                          alert("Your refresh Token expiry, please Login and useSpecific services");
+                          dispatch(logout());
+                          navigate("/login");
+                          return;
+                      }
+                      if (res2?.data?.message === "Access Token is created SuccessFully") {
+                           await toggleUserReactionForComment(commentId, videoId, reaction);
+                         
+                          return;
+                      }
+                  }
+       
     } catch (error) {
       console.log(error);
     }
@@ -137,11 +187,23 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
       return;
     }
 
-    try {
-      await addCommentVideo(comment, videoId);
-    } catch (error) {
-      console.log(error);
-    }
+   
+      const res= await addCommentVideo(comment, videoId);
+       if (res?.response?.data?.data === "Unauthorized request, Token created") {
+                      const res2 = await generateNewAccessToken();
+                      if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+                          alert("Your refresh Token expiry, please Login and useSpecific services");
+                          dispatch(logout());
+                          navigate("/login");
+                          return;
+                      }
+                      if (res2?.data?.message === "Access Token is created SuccessFully") {
+                           await addCommentVideo(comment, videoId);
+                          return;
+                      }
+                  }
+     
+   
     setComment("");
     setSubmitButton(false);
 
@@ -158,11 +220,22 @@ const Comment = ({ setOpen, open, user, videoInfo, commentInfo, replyedCommentIn
 
   // Delete comment
   const handleDelete = async (comId) => {
-    try {
-      await deleteComment(comId, videoId);
-    } catch (error) {
-      console.log(error);
-    }
+ 
+      const res = await deleteComment(comId, videoId);
+       if (res?.response?.data?.data === "Unauthorized request, Token created") {
+                      const res2 = await generateNewAccessToken();
+                      if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+                          alert("Your refresh Token expiry, please Login and useSpecific services");
+                          dispatch(logout());
+                          navigate("/login");
+                          return;
+                      }
+                      if (res2?.data?.message === "Access Token is created SuccessFully") {
+                           await deleteComment(comId, videoId);
+                          return;
+                      }
+                  }
+  
   };
 
 

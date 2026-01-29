@@ -1,4 +1,9 @@
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { logout } from "../store/auth.slice"
+import { useNavigate } from "react-router-dom"
+
+
 
 // const serverUrl = import.meta.env.VITE_BACKEND_SERVER_URL;
 
@@ -22,18 +27,18 @@ const googleSignup = async (code) => {
         console.log("Code can not provide code is required..");
     }
     try {
-       const res = await axios.post(`/api/v1/users/google-register`, {
-        code
-       },
-       {
-        headers: {"Content-Type": "application/json"}
-       }
-    
-    ) 
-    return res;
+        const res = await axios.post(`/api/v1/users/google-register`, {
+            code
+        },
+            {
+                headers: { "Content-Type": "application/json" }
+            }
+
+        )
+        return res;
 
     } catch (error) {
-       console.log(error); 
+        console.log(error);
     }
 }
 
@@ -46,13 +51,13 @@ const googleLogin = async (code) => {
         )
 
         return res;
-        
+
     } catch (error) {
-        console.log("Error for googleLogin",error);
+        console.log("Error for googleLogin", error);
     }
 }
 
-const afterSignupRedirectlogin = async(email) => {
+const afterSignupRedirectlogin = async (email) => {
     try {
         if (!email) {
             console.log("Email cannot provide");
@@ -66,7 +71,7 @@ const afterSignupRedirectlogin = async(email) => {
 
         console.log(res);
         return res;
-        
+
     } catch (error) {
         console.log("Error for redirectiongooglelogin", error)
     }
@@ -111,27 +116,26 @@ const Userprofile = async () => {
                 withCredentials: true,
             }
         );
-        console.log(response);
         return response;
     } catch (error) {
-        console.log(error);
+        return error;
     }
 }
 
 const userDashboard = async (username) => {
-   try {
-    
-     const response = await axios.get(
-         `/api/v1/users/user-channel-profile/${username}`
-     ,
-     {withCredentials:true}
-     )
-     return response;
-   } catch (error) {
-    console.log("Error call the dashboard api", error)
-    return error.response;  // 🔥 return error so you can inspect in React
-   }
-    
+
+    try {
+
+        const response = await axios.get(
+            `/api/v1/users/user-channel-profile/${username}`
+            ,
+            { withCredentials: true }
+        )
+        return response;
+    } catch (error) {
+        return error;  
+    }
+
 }
 
 const forgotPassword = async (email) => {
@@ -140,7 +144,7 @@ const forgotPassword = async (email) => {
         return
     }
     try {
-       
+
         const res = await axios.post(`api/v1/users/forgot-password`,
             {
                 email
@@ -152,7 +156,7 @@ const forgotPassword = async (email) => {
     }
 }
 
-const verifyOtp = async(email, otp) => {
+const verifyOtp = async (email, otp) => {
     if (!email || !otp) {
         console.log("Email and otp is required for the vefification")
         return;
@@ -182,20 +186,22 @@ const updatePassword = async (email, password) => {
             {
                 email, password
             },
-             {
-                withCredentials:true,
+            {
+                withCredentials: true,
             }
         );
 
-        return res;  
+        return res;
     } catch (error) {
-       return error;
+        return error;
     }
 }
 
-const generateNewAccessToken = async() => {
+const generateNewAccessToken = async () => {
+   
     try {
-        const res = await axios.post(`/refresh-access-token`,
+        const res = await axios.post(`api/v1/users/refresh-access-token`,
+            {},
             {
                 withCredentials: true,
             }
@@ -203,7 +209,7 @@ const generateNewAccessToken = async() => {
         console.log("AccessToken response", res);
         return res;
     } catch (error) {
-        console.log(error)
+        return error;
     }
 }
 

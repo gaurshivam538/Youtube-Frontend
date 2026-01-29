@@ -7,12 +7,14 @@ import { timingFormat } from "./homeLongVideoCard";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 import { RedirectPopup } from "../index"
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import LikeAndDislike from "./VideoComponents/LikeAndDislike";
 import { toggleUserReaction, userVideoReactionStatus } from "../../services/like.service";
 import Comment from "./VideoComponents/Comment";
 import { getAllCommentsSpecificVideo } from "../../services/comment.service";
 import socket from "../../Socket";
+import { generateNewAccessToken } from "../../services/user.service";
+import { logout } from "../../store/auth.slice";
 
 
 const REDIRECT_DELAY = 6;
@@ -23,6 +25,7 @@ function MainLongVideoCard() {
   const progressRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.userData);
 
   const [videoInfo, setVideoInfo] = useState({});
@@ -41,14 +44,29 @@ function MainLongVideoCard() {
   const [userReaction, setUserReaction] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(REDIRECT_DELAY);
-  const[replyedCommentInfo, setReplyedCommentInfo] = useState([]);
+  const [replyedCommentInfo, setReplyedCommentInfo] = useState([]);
   /* ================= 1 VIDEO FETCH ================= */
   useEffect(() => {
     if (!videoId) return;
 
     const fetchVideo = async () => {
       try {
-        const res = await getSpecificVideo(videoId);
+        let res = await getSpecificVideo(videoId);
+        if (res?.response?.data?.data === "Unauthorized request, Token created") {
+          const res2= await generateNewAccessToken();
+          if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+            alert("Your refresh Token expiry, please Login and useSpecific services");
+            dispatch(logout());
+            navigate("/login")
+            return;
+          }
+           if (res2?.data?.message === "Access Token is created SuccessFully") {
+            const res3 = await getSpecificVideo(videoId);
+            res = res3;
+            return;
+           }
+        }
+       
         setVideoInfo(res);
         // setCommentInfo(res.commentInfo);
       } catch (error) {
@@ -146,7 +164,21 @@ function MainLongVideoCard() {
     if (!videoId) return;
     try {
       const fetchUserReaction = async () => {
-        const res = await userVideoReactionStatus(videoId);
+        let res = await userVideoReactionStatus(videoId);
+      if (res?.response?.data?.data === "Unauthorized request, Token created") {
+          const res2= await generateNewAccessToken();
+          if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+            alert("Your refresh Token expiry, please Login and useSpecific services");
+            dispatch(logout());
+            navigate("/login")
+            return;
+          }
+           if (res2?.data?.message === "Access Token is created SuccessFully") {
+            const res3 = await userVideoReactionStatus(videoId);
+            res = res3;
+            return;
+           }
+        }
         setUserReaction(res);
 
       }
@@ -173,36 +205,56 @@ function MainLongVideoCard() {
   }, [userReaction]);
 
   //=============Get all comments for specific video========//
-   useEffect(() => {
-     if(!videoId) return;
+  useEffect(() => {
+    if (!videoId) return;
 
-     const fetchData = async () => {
-       try {
+    const fetchData = async () => {
+      try {
         console.log(videoId)
         const res = await getAllCommentsSpecificVideo(videoId);
+        if (res?.response?.data?.data === "Unauthorized request, Token created") {
+          const res2= await generateNewAccessToken();
+          if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+            alert("Your refresh Token expiry, please Login and useSpecific services");
+            dispatch(logout());
+            navigate("/login")
+            return;
+          }
+           if (res2?.data?.message === "Access Token is created SuccessFully") {
+            const res3 = await getAllCommentsSpecificVideo(videoId);
+            const notReplyedComment = res3.filter((comment) => comment.parentComment === null);
+        const ReplyedComment = res3.filter((comment) => comment.parentComment !== null);
+        console.log("NotreplyComment", notReplyedComment);
+        console.log("replyedComment", ReplyedComment);
+        setCommentInfo(notReplyedComment);
+        setReplyedCommentInfo(ReplyedComment);
+            return;
+           }
+        }
+        
         const notReplyedComment = res.filter((comment) => comment.parentComment === null);
         const ReplyedComment = res.filter((comment) => comment.parentComment !== null);
         console.log("NotreplyComment", notReplyedComment);
-        console.log("replyedComment" , ReplyedComment);
+        console.log("replyedComment", ReplyedComment);
         setCommentInfo(notReplyedComment);
         setReplyedCommentInfo(ReplyedComment);
-        
-        // setCommentInfo(res);
-       } catch (error) {
-        console.lof(error);
-       }
-     }
-       fetchData();
 
-   }, [videoId]);
- 
-//===========Socket Connection===========//   
-   useEffect(() => {
+        // setCommentInfo(res);
+      } catch (error) {
+        console.lof(error);
+      }
+    }
+    fetchData();
+
+  }, [videoId]);
+
+  //===========Socket Connection===========//   
+  useEffect(() => {
     if (!videoId) {
       return;
     }
-     socket.emit("join-video",videoId );
-     socket.on("newComment", (comment) => {
+    socket.emit("join-video", videoId);
+    socket.on("newComment", (comment) => {
       if (comment.video == videoId && comment.parentComment == null) {
 
         setCommentInfo((prev) => [comment, ...prev])
@@ -213,10 +265,10 @@ function MainLongVideoCard() {
         setReplyedCommentInfo((prev) => [comment, ...prev]);
       }
 
-     });
-     return () => socket.off("newComment")
+    });
+    return () => socket.off("newComment")
 
-   }, [videoId]);
+  }, [videoId]);
 
   /* ================= 5 PLAY / PAUSE ================= */
   const togglePlay = () => {
@@ -288,13 +340,27 @@ function MainLongVideoCard() {
 
     try {
       const res = await toggleUserReaction(videoId, reaction)
+       if (res?.response?.data?.data === "Unauthorized request, Token created") {
+          const res2= await generateNewAccessToken();
+          if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+            alert("Your refresh Token expiry, please Login and useSpecific services");
+            dispatch(logout());
+            navigate("/login")
+            return;
+          }
+           if (res2?.data?.message === "Access Token is created SuccessFully") {
+             await toggleUserReaction(videoId, reaction);
+            
+            return;
+           }
+        }
     } catch (error) {
       console.log(error)
     }
 
   };
-  
-  
+
+
 
 
   const toggleDislike = async () => {
@@ -319,6 +385,20 @@ function MainLongVideoCard() {
 
     try {
       const res = await toggleUserReaction(videoId, reaction)
+       if (res?.response?.data?.data === "Unauthorized request, Token created") {
+          const res2= await generateNewAccessToken();
+          if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+            alert("Your refresh Token expiry, please Login and useSpecific services");
+            dispatch(logout());
+            navigate("/login")
+            return;
+          }
+           if (res2?.data?.message === "Access Token is created SuccessFully") {
+             await toggleUserReaction(videoId, reaction);
+            
+            return;
+           }
+        }
     } catch (error) {
       console.log(error)
     }
@@ -476,14 +556,14 @@ function MainLongVideoCard() {
             {/* ================= COMMENTS ================= */}
             <div className="mt-6">
               <Comment
-              setOpen = {setOpen}
-              open = {open}
-              user = {user}
-              videoInfo = {videoInfo}
-              commentInfo = {commentInfo}
-              setCommentInfo ={setCommentInfo}
-              replyedCommentInfo = {replyedCommentInfo}
-              setReplyedCommentInfo = {setReplyedCommentInfo}
+                setOpen={setOpen}
+                open={open}
+                user={user}
+                videoInfo={videoInfo}
+                commentInfo={commentInfo}
+                setCommentInfo={setCommentInfo}
+                replyedCommentInfo={replyedCommentInfo}
+                setReplyedCommentInfo={setReplyedCommentInfo}
               />
             </div>
 

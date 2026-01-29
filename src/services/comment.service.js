@@ -14,6 +14,8 @@ const addCommentVideo = async (content, videoId) => {
         return res;
     } catch (error) {
         console.log(error)
+        return error
+
     }
 }
 
@@ -31,6 +33,8 @@ const addCommentForSpecificComment = async (content, videoId, commentId) => {
             return res;
     } catch (error) {
         console.log(error);
+        return error
+
     }
 }
 
@@ -46,6 +50,8 @@ const deleteComment = async(commentId, videoId) => {
         return res;
     } catch (error) {
         console.log(error)
+        return error
+
     }
 }
 const updateComment = async(content, commentId, videoId) => {
@@ -62,6 +68,8 @@ const updateComment = async(content, commentId, videoId) => {
         )
         console.log(res);
         return res;
+        return error
+
     } catch (error) {
         console.log(error)
     }
@@ -80,6 +88,8 @@ const getAllCommentsSpecificVideo = async (videoId) => {
         return res?.data?.comments;
     } catch (error) {
         console.log(error)
+        return error
+
     }
 }
 

@@ -1,6 +1,13 @@
 import { updateComment } from "../../../services/comment.service";
+import { generateNewAccessToken } from "../../../services/user.service";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../../../store/auth.slice";
 
 const EditComment = ({ commentId, user,  editCommentContent , setEditCommentContent, setEditCommentId, videoId }) => {
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,7 +21,21 @@ const EditComment = ({ commentId, user,  editCommentContent , setEditCommentCont
     try {
         console.log(editCommentContent)
       const res = await updateComment(editCommentContent, commentId, videoId);
-      console.log(res);
+        if (res?.response?.data?.data === "Unauthorized request, Token created") {
+                      const res2 = await generateNewAccessToken();
+                      if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+                          alert("Your refresh Token expiry, please Login and useSpecific services");
+                          dispatch(logout());
+                          navigate("/login");
+                          return;
+                      }
+                      if (res2?.data?.message === "Access Token is created SuccessFully") {
+                          await updateComment(editCommentContent, commentId, videoId);
+                      
+                          return;
+                      }
+                  }
+     
     } catch (error) {
       console.log(error);
     }

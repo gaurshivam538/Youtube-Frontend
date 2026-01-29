@@ -40,7 +40,7 @@ const uploadVideo = async (title, description, videoFile, thumbnail, category, i
         
         return response;
     } catch (error) {
-        
+        return error
     }
 }
 
@@ -53,7 +53,7 @@ const getSpecificVideo = async (videoId) => {
         return res.data.data[0];
     } catch (error) {
         console.log("Error comes to fetch the video by id ", error);
-        throw error;
+        return error;
     }
 }
 
