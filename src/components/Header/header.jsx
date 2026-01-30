@@ -74,7 +74,7 @@ function Header() {
                   )
               )}
 
-            <li>{authStatus && <Logout />}</li>
+            {/* <li>{authStatus && <Logout />}</li> */}
             <li>{authStatus && <CreateMenu/>}</li>
             <li>{authStatus && <ProfilePopup/>}</li>
           </ul>

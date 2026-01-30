@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import {Link} from "react-router-dom"
+import { IoMdAdd } from "react-icons/io";
 function CreateMenu() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef();
@@ -21,10 +22,13 @@ function CreateMenu() {
       {/* Create Button */}
       <button
         onClick={() => setOpen(!open)}
-        className="px-4 py-2 bg-[#313537] text-white rounded-full flex items-center gap-2"
+        className="px-3 py-[6px] bg-[#dcdedfc7] text-black dark:text-white rounded-full flex items-center gap-2"
       >
-        <span className="text-xl">+</span>
-        Create
+       <IoMdAdd 
+       className="h-6 w-6"
+       />
+       <h1>Create</h1>
+        
       </button>
 
       {/* Popup Menu */}

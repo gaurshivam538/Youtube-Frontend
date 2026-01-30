@@ -3,6 +3,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import {logout} from "../store/auth.slice"
 import { Logout as serviceLogout} from '../services/user.service';
+import { AiOutlineLogout } from "react-icons/ai";
 
 function Logout() {
 
@@ -20,8 +21,11 @@ function Logout() {
 
     return (
         <div>
-            <button onClick={() => logoutHandler()} className="hover:text-blue-500 cursor-pointer">
-                Logout
+            <button onClick={() => logoutHandler()} className="hover:text-blue-500 cursor-pointer flex text-black dark:text-white  gap-x-3 items-center">
+                <AiOutlineLogout 
+                className ="w-8 h-8"
+                />
+                <h1>Logout</h1>
             </button>
         </div>
     );

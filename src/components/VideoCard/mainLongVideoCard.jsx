@@ -15,6 +15,8 @@ import { getAllCommentsSpecificVideo } from "../../services/comment.service";
 import socket from "../../Socket";
 import { generateNewAccessToken } from "../../services/user.service";
 import { logout } from "../../store/auth.slice";
+import { subscribedStatus } from "../../../../Backend/src/controllers/subscriberController";
+import { getUserChannelSubscribed, toggleSubscriber } from "../../services/subscribed.service";
 
 
 const REDIRECT_DELAY = 6;
@@ -45,6 +47,8 @@ function MainLongVideoCard() {
   const [showPopup, setShowPopup] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(REDIRECT_DELAY);
   const [replyedCommentInfo, setReplyedCommentInfo] = useState([]);
+  const [subscribedAction, setSubscribedAction] = useState(false);
+  const [subscriberdetails, setSubscriberdetails] = useState([]);
   /* ================= 1 VIDEO FETCH ================= */
   useEffect(() => {
     if (!videoId) return;
@@ -66,7 +70,7 @@ function MainLongVideoCard() {
             return;
            }
         }
-       
+       console.log(res);
         setVideoInfo(res);
         // setCommentInfo(res.commentInfo);
       } catch (error) {
@@ -270,6 +274,75 @@ function MainLongVideoCard() {
 
   }, [videoId]);
 
+  //===========Subscribed Status ===========//
+  useEffect(() => {
+
+    const fetchUserSubscribedStatus = async() => {
+      const channelId = videoInfo?.owner?._id;
+      if (!channelId) {
+        console.log("ChannelId is required");
+        return;
+      }
+      let res = await subscribedStatus(channelId);
+        if (res?.response?.data?.data === "Unauthorized request, Token created") {
+          const res2= await generateNewAccessToken();
+          if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+            alert("Your refresh Token expiry, please Login and useSpecific services");
+            dispatch(logout());
+            navigate("/login")
+            return;
+          }
+           if (res2?.data?.message === "Access Token is created SuccessFully") {
+              const res3 =await subscribedStatus(channelId);
+              res = res3;
+            return;
+           }
+        }
+        console.log(res);
+
+        if (res?.data?.data?.subscribed === true) {
+          setSubscribedAction(true);
+        }
+
+        if (res?.data?.data?.subscribed === false) {
+          setSubscribedAction(false);
+        }
+    }
+    fetchUserSubscribedStatus();
+
+ 
+  }, [videoId]);
+
+  useEffect(() => {
+    const getUserSubscribers = async() => {
+      const channelId = videoInfo?.owner?._id;
+      if (!channelId) {
+        console.log("channelId is required");
+        return;
+      }
+
+      let res = await getUserChannelSubscribed(channelId);
+      if (res?.response?.data?.data === "Unauthorized request, Token created") {
+          const res2= await generateNewAccessToken();
+          if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+            alert("Your refresh Token expiry, please Login and useSpecific services");
+            dispatch(logout());
+            navigate("/login")
+            return;
+          }
+           if (res2?.data?.message === "Access Token is created SuccessFully") {
+              const res3 = await getUserChannelSubscribed(channelId);
+              res = res3;
+            return;
+           }
+        }
+        console.log(res);
+        if (res?.data?.statusCode === 200) {
+          setSubscriberdetails(res?.data?.data);
+        }
+    }
+  }, [videoId]);
+
   /* ================= 5 PLAY / PAUSE ================= */
   const togglePlay = () => {
     if (!user) {
@@ -360,9 +433,6 @@ function MainLongVideoCard() {
 
   };
 
-
-
-
   const toggleDislike = async () => {
     const reaction = "dislike";
 
@@ -404,6 +474,41 @@ function MainLongVideoCard() {
     }
 
   };
+
+  const handletoggleSubsribed = async() => {
+    if (!videoInfo?.owner?._id) {
+      console.log("Video owner is required");
+      return;
+    }
+
+    let res = await toggleSubscriber(!videoInfo?.owner?._id);
+    if (res?.response?.data?.data === "Unauthorized request, Token created") {
+          const res2= await generateNewAccessToken();
+          if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+            alert("Your refresh Token expiry, please Login and useSpecific services");
+            dispatch(logout());
+            navigate("/login")
+            return;
+          }
+           if (res2?.data?.message === "Access Token is created SuccessFully") {
+              const res3 = await toggleSubscriber(!videoInfo?.owner?._id);
+              res = res3;
+            return;
+           }
+        }
+        console.log(res);
+
+        if (res?.data?.message === "Subscribed Successfully") {
+          setSubscribedAction(true);
+          return;
+        }
+
+        if (res?.data?.message === "Unsubscribed Successfully") {
+          setSubscribedAction(false);
+          return;
+        }
+
+  }
 
   return (
     <div>
@@ -516,11 +621,15 @@ function MainLongVideoCard() {
                       }
                     </div>
 
-                    <div>
-                      <p className="text-sm font-medium">{videoInfo.owner.username}</p>
-                      <p className="text-xs text-gray-400">
-                        {/* {videoInfo.subscribers} subscribers */}
-                      </p>
+                    <div className="flex flex-col items-center justify-center">
+                      <p className="text-sm font-medium">{videoInfo?.owner?.username}</p>
+                      
+                      <button className="text-xs text-gray-400"
+                      onClick={handletoggleSubsribed}
+                      >
+                        {} subscribers
+                      </button>
+
                     </div>
                     <button className="ml-3 bg-red-600 px-4 py-1 rounded-full text-sm">
                       Subscribe

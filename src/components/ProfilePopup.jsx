@@ -7,6 +7,7 @@ import { generateNewAccessToken, Userprofile as serviceUserprofile } from '../se
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {logout} from "../components/../store/auth.slice"
+import {Logout} from "./index"
 
 const ProfilePopup = () => {
     const [open, setopen] = useState(false);
@@ -71,7 +72,7 @@ const ProfilePopup = () => {
             </button>
             {
                 open && (
-                    <div className=' absolute right-0 mt-2 text-lg w-80 p-4  bg-slate-200 text-white shadow-lg z-30 flex flex-col rounded-xl'>
+                    <div className=' absolute right-0 mt-2 text-lg w-80 p-4  bg-slate-200 text-black dark:text-white shadow-lg z-30 flex flex-col rounded-xl'>
                         <div className='flex gap-x-3 items-center'>
                             <div className=' h-10 w-10 rounded-full overflow-hidden object-cover'>
                                 <img
@@ -97,6 +98,15 @@ const ProfilePopup = () => {
                             </Link>
                         </div>
                         <div className='w-[100%] h-[1px] bg-gray-500 mt-4'></div>
+                        <div
+                        className = "w-full mt-3 flex flex-col gap-x-3"
+                        >
+                            <div
+                            className='ml-[6px]'
+                            >
+                                <Logout/>
+                            </div>
+                        </div>
                     </div>
                 )
             }
