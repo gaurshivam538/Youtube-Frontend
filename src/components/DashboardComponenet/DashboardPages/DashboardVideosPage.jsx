@@ -8,7 +8,7 @@ const DashboardVideosPage = () => {
     const [videoInfo, setVideoInfo] = useState([])
     useEffect(() => {
       const fetchData = async () => {
-      const res = await userDashboard(username);
+      let res = await userDashboard(username);
        if (res?.response?.data?.data === "Unauthorized request, Token created") {
                     const res2 = await generateNewAccessToken();
                     if (res2?.response?.data?.data === "Refresh Token can not provide please login") {

@@ -341,6 +341,7 @@ function MainLongVideoCard() {
           setSubscriberdetails(res?.data?.data);
         }
     }
+    getUserSubscribers();
   }, [videoId]);
 
   /* ================= 5 PLAY / PAUSE ================= */
