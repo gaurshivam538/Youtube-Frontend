@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
+import { useSearchParams, useLocation, useNavigate, Link } from "react-router-dom";
 import Hls from "hls.js";
 import { getSpecificVideo } from "../../services/video.service";
 import { Loader, ProfilePopup } from "../index";
@@ -15,7 +15,7 @@ import { getAllCommentsSpecificVideo } from "../../services/comment.service";
 import socket from "../../Socket";
 import { generateNewAccessToken } from "../../services/user.service";
 import { logout } from "../../store/auth.slice";
-import { subscribedStatus } from "../../../../Backend/src/controllers/subscriberController";
+import { subscribedStatus } from "../../services/subscribed.service";
 import { getUserChannelSubscribed, toggleSubscriber } from "../../services/subscribed.service";
 
 
@@ -49,6 +49,7 @@ function MainLongVideoCard() {
   const [replyedCommentInfo, setReplyedCommentInfo] = useState([]);
   const [subscribedAction, setSubscribedAction] = useState(false);
   const [subscriberdetails, setSubscriberdetails] = useState([]);
+  const [subscriberCount, setSubscriberCount] = useState(null);
   /* ================= 1 VIDEO FETCH ================= */
   useEffect(() => {
     if (!videoId) return;
@@ -275,14 +276,15 @@ function MainLongVideoCard() {
   }, [videoId]);
 
   //===========Subscribed Status ===========//
-  useEffect(() => {
 
+  useEffect(() => {
     const fetchUserSubscribedStatus = async() => {
       const channelId = videoInfo?.owner?._id;
       if (!channelId) {
         console.log("ChannelId is required");
         return;
       }
+      console.log("Status",channelId);
       let res = await subscribedStatus(channelId);
         if (res?.response?.data?.data === "Unauthorized request, Token created") {
           const res2= await generateNewAccessToken();
@@ -298,20 +300,21 @@ function MainLongVideoCard() {
             return;
            }
         }
-        console.log(res);
 
         if (res?.data?.data?.subscribed === true) {
           setSubscribedAction(true);
+          return;
         }
 
         if (res?.data?.data?.subscribed === false) {
           setSubscribedAction(false);
+          return;
         }
     }
     fetchUserSubscribedStatus();
 
  
-  }, [videoId]);
+  }, [videoInfo?.owner?._id]);
 
   useEffect(() => {
     const getUserSubscribers = async() => {
@@ -336,13 +339,15 @@ function MainLongVideoCard() {
             return;
            }
         }
-        console.log(res);
         if (res?.data?.statusCode === 200) {
+          const totalSubscriber = res.data.data.length || 0;
+          setSubscriberCount(totalSubscriber);
           setSubscriberdetails(res?.data?.data);
+          return;
         }
     }
     getUserSubscribers();
-  }, [videoId]);
+  }, [videoInfo?.owner?._id]);
 
   /* ================= 5 PLAY / PAUSE ================= */
   const togglePlay = () => {
@@ -477,12 +482,30 @@ function MainLongVideoCard() {
   };
 
   const handletoggleSubsribed = async() => {
+    
+    if (subscribedAction) {
+      setSubscribedAction(false);
+      setSubscriberCount((prev) => {
+        if (prev ===0) {
+          return;
+        }
+        return prev-1;
+      })
+    } else {
+      setSubscribedAction(true);
+      setSubscriberCount((prev) => {
+        return prev+1;
+      })
+    }
+
     if (!videoInfo?.owner?._id) {
       console.log("Video owner is required");
       return;
     }
+    const channelId = videoInfo?.owner?._id;
 
-    let res = await toggleSubscriber(!videoInfo?.owner?._id);
+
+    let res = await toggleSubscriber(channelId);
     if (res?.response?.data?.data === "Unauthorized request, Token created") {
           const res2= await generateNewAccessToken();
           if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
@@ -492,7 +515,7 @@ function MainLongVideoCard() {
             return;
           }
            if (res2?.data?.message === "Access Token is created SuccessFully") {
-              const res3 = await toggleSubscriber(!videoInfo?.owner?._id);
+              const res3 = await toggleSubscriber(channelId);
               res = res3;
             return;
            }
@@ -500,12 +523,12 @@ function MainLongVideoCard() {
         console.log(res);
 
         if (res?.data?.message === "Subscribed Successfully") {
-          setSubscribedAction(true);
+          // setSubscribedAction(true);
           return;
         }
 
         if (res?.data?.message === "Unsubscribed Successfully") {
-          setSubscribedAction(false);
+          // setSubscribedAction(false);
           return;
         }
 
@@ -611,6 +634,9 @@ function MainLongVideoCard() {
 
                   {/* CHANNEL */}
                   <div className="flex items-center gap-3">
+                    <Link
+                    to = {`/${videoInfo.owner.username}`}
+                    >
                     <div className="w-10 h-10 rounded-full bg-gray-600" >
                       {
                         videoInfo?.owner.avatar && (
@@ -621,18 +647,26 @@ function MainLongVideoCard() {
                         )
                       }
                     </div>
-
+                    </Link>
                     <div className="flex flex-col items-center justify-center">
-                      <p className="text-sm font-medium">{videoInfo?.owner?.username}</p>
-                      
-                      <button className="text-xs text-gray-400"
-                      onClick={handletoggleSubsribed}
+                      <Link
+                      to = {`/${videoInfo.owner.username}`}
                       >
-                        {} subscribers
+                      <p className="text-sm font-medium">{videoInfo?.owner?.username}</p>
+                      </Link>
+                      <button className=" text-gray-400"
+                      
+                      >
+                        {subscriberCount} subscribers
                       </button>
 
                     </div>
-                    <button className="ml-3 bg-red-600 px-4 py-1 rounded-full text-sm">
+                    <button className={`ml-3 px-4 py-1 rounded-full text-sm
+                    ${subscribedAction? "bg-red-600": "bg-transparent"}
+                    `}
+                    onClick={handletoggleSubsribed}
+                    
+                    >
                       Subscribe
                     </button>
                   </div>
