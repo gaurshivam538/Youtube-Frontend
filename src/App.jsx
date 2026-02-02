@@ -2,7 +2,29 @@ import React from "react";
 import Header from "./components/Header/header";
 import Footer from "./components/Footer/footer";
 import { Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import socket from "./Socket";
+import { decrementCount, incrementCount } from "./store/subscribedaction.slice";
 function App() {
+  const authStatus = useSelector((state) => state.auth.userData);
+  useEffect(() => {
+   if (!authStatus) {
+    console.log("LoggedIn is required");
+    return;
+   }
+   socket.on("subscription:update",({subscriberId, action}) => {
+    if (action === "UNSUBSCRIBE") {
+      decrementCount();
+    }
+
+    if (action === "SUBSCRIBE") {
+      incrementCount();
+    }
+   } )
+
+  }, [authStatus]);
+  
   return (
     <div className="text-black">
       {/* Header */}

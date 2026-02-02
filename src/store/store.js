@@ -3,12 +3,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./auth.slice"
 import uploadReducer from "./upload.slice"
 import emailReducer from "./emailsave.slice"
+import subscribeReducer from "./subscribedaction.slice"
 
 const store = configureStore({
     reducer: {
         auth:authReducer,
         upload:uploadReducer,
-        email: emailReducer
+        email: emailReducer,
+        subscribe: subscribeReducer
     }
 })
 

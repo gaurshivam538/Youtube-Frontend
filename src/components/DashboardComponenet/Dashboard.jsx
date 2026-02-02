@@ -2,15 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useMatch, useParams, useNavigate } from 'react-router-dom';
 import { generateNewAccessToken, userDashboard } from '../../services/user.service';
 import { FaSearch } from "react-icons/fa";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/auth.slice';
+import { subscribedStatus, toggleSubscriber } from '../../services/subscribed.service';
+import { setSubscribedCount } from '../../store/subscribedaction.slice';
 
 const Dashboard = () => {
-  const { username } = useParams();
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loggedInUser, setLoggedInUser] = useState(false);
+  const [subscribedReaction, setSubscribedReaction] = useState(false);
+
+  const { username } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const authUserData = useSelector((state) => state.auth.userData);
+  const SubscriberCount = useSelector((state) => state.subscribe.subscribedCount);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,7 +42,11 @@ const Dashboard = () => {
         }
 
         if (res?.status === 200) {
+          dispatch(setSubscribedCount(userInfo.subscribersCount))
           setUserInfo(res.data.data);
+        }
+        if (res?.owner?._id.toString() === authUserData.toString()) {
+          setLoggedInUser(true);
         }
       } catch (err) {
         console.error("Dashboard error:", err);
@@ -46,6 +57,35 @@ const Dashboard = () => {
 
     fetchData();
   }, [username, dispatch, navigate]);
+
+  useEffect(() => {
+    const fetchSubscribeStatus = async () => {
+      let res = await subscribedStatus(userInfo?._id);
+      if (res?.response?.data?.data === "Unauthorized request, Token created") {
+          const res2= await generateNewAccessToken();
+          if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+            alert("Your refresh Token expiry, please Login and useSpecific services");
+            dispatch(logout());
+            navigate("/login")
+            return;
+          }
+           if (res2?.data?.message === "Access Token is created SuccessFully") {
+              const res3 = await subscribedStatus(userInfo?._id);(userInfo._id);
+              res = res3;
+            return;
+           }
+        }
+        if (res?.data?.data?.subscribed === true) {
+          setSubscribedReaction(true);
+          return;
+        }
+    }
+    fetchSubscribeStatus();
+  }, [userInfo._id]);
+
+  const handletoggleSubscribed = async () => {
+    
+  }
 
   const homeMatch = useMatch(`/${username}`);
   const featuresMatch = useMatch(`/${username}/features`);
@@ -82,7 +122,7 @@ const Dashboard = () => {
               <div className="flex flex-wrap items-center gap-2 text-gray-500 text-sm">
                 <span>{userInfo?.username}</span>
                 <span>•</span>
-                <span>{userInfo?.subscribersCount} subscribers</span>
+                <span>{SubscriberCount} subscribers</span>
                 <span>•</span>
                 <span>{userInfo?.videoCount} videos</span>
               </div>
@@ -90,28 +130,50 @@ const Dashboard = () => {
               <div className="text-gray-400 text-sm">
                 More about this channel <span className="text-white cursor-pointer">...more</span>
               </div>
-
-              <div className="hidden md:flex gap-2 mt-2">
+              {
+                loggedInUser ?( <div className="hidden md:flex gap-2 mt-2">
                 <button className="rounded-full px-4 py-2 bg-gray-200 ">
                   Customize channel
                 </button>
                 <button className="rounded-full px-4 py-2 bg-gray-200">
                   Manage videos
                 </button>
-              </div>
+              </div>): ( <div className="hidden md:flex gap-2 mt-2">
+                <button className={`rounded-full px-4 py-2  ${subscribedReaction ? "bg-red-400": "bg-gray-200"}`
+              }
+              onClick={handletoggleSubscribed}
+              >
+                  Subscribe
+                </button>
+                <button className="rounded-full px-4 py-2 bg-gray-200">
+                 Join
+                </button>
+              </div>)
+              }
+             
             </div>
           </div>
         )}
 
         {/* MOBILE BUTTONS */}
-        <div className="mt-4 flex md:hidden gap-2">
+        {
+          loggedInUser ? (<div className="mt-4 flex md:hidden gap-2">
           <button className="w-1/2 py-2 bg-gray-200 rounded-full">
             Customize channel
           </button>
           <button className="w-1/2 py-2 bg-gray-200 rounded-full">
             Manage channel
           </button>
-        </div>
+        </div>): (<div className="mt-4 flex md:hidden gap-2">
+          <button className="w-1/2 py-2 bg-gray-200 rounded-full">
+            Subscribe
+          </button>
+          <button className="w-1/2 py-2 bg-gray-200 rounded-full">
+           Join
+          </button>
+        </div>)
+        }
+        
       </div>
 
       {/* NAV */}
