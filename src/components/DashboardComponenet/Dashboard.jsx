@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [loggedInUser, setLoggedInUser] = useState(false);
   const [subscribedReaction, setSubscribedReaction] = useState(false);
+  const [diffProfSubCount, setDiffProfSubCount] = useState(0);
 
   const { username } = useParams();
   const dispatch = useDispatch();
@@ -42,10 +43,16 @@ const Dashboard = () => {
         }
 
         if (res?.status === 200) {
-          dispatch(setSubscribedCount(userInfo.subscribersCount))
           setUserInfo(res.data.data);
+          dispatch(setSubscribedCount(res?.data?.data?.subscribersCount));
+          setDiffProfSubCount(res?.data?.data?.subscribersCount);
         }
-        if (res?.owner?._id.toString() === authUserData.toString()) {
+        console.log(res?.data?.data?._id);
+        console.log(res?.data?.data?._id.toString());
+        console.log()
+
+        if (res?.data?.data?._id.toString() === authUserData?._id.toString()) {
+          console.log("Hai");
           setLoggedInUser(true);
         }
       } catch (err) {
@@ -79,12 +86,62 @@ const Dashboard = () => {
           setSubscribedReaction(true);
           return;
         }
+         if (res?.data?.data?.subscribed === false) {
+          setSubscribedReaction(false);
+          return;
+        }
     }
     fetchSubscribeStatus();
-  }, [userInfo._id]);
+  }, [userInfo]);
 
   const handletoggleSubscribed = async () => {
-    
+    if (subscribedReaction === true) {
+      setSubscribedReaction(false);
+      setDiffProfSubCount((prev) => {
+        if (prev === 0) {
+          return;
+        }
+        return prev-1;
+      })
+    }
+
+    if (subscribedReaction === false) {
+      setSubscribedReaction(true);
+      setDiffProfSubCount((prev) => prev+1);
+    }
+
+    let res = await toggleSubscriber(userInfo?._id);
+     if (res?.response?.data?.data === "Unauthorized request, Token created") {
+      setSubscribedReaction(false);
+              const res2= await generateNewAccessToken();
+              if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
+       setSubscribedReaction(false);
+                alert("Your refresh Token expiry, please Login and useSpecific services");
+                dispatch(logout());
+                navigate("/login")
+                return;
+              }
+               if (res2?.data?.message === "Access Token is created SuccessFully") {
+                  const res3 = await toggleSubscriber(channelId);
+                  res = res3;
+                return;
+               }
+            }
+
+            if (res?.data?.message === "Unsubscribed Successfully") {
+              setSubscribedReaction(false);
+      //         setDiffProfSubCount((prev) => {
+      //   if (prev === 0) {
+      //     return;
+      //   }
+      //   return prev-1;
+      // })
+              return;
+            }
+
+            if (res?.data?.message === "Subscribed Successfully") {
+              setSubscribedReaction(true);
+            }
   }
 
   const homeMatch = useMatch(`/${username}`);
@@ -122,7 +179,10 @@ const Dashboard = () => {
               <div className="flex flex-wrap items-center gap-2 text-gray-500 text-sm">
                 <span>{userInfo?.username}</span>
                 <span>•</span>
-                <span>{SubscriberCount} subscribers</span>
+                {
+                 loggedInUser? ( <span>{SubscriberCount} subscribers</span>): ( <span>{diffProfSubCount} subscribers</span>)
+                }
+               
                 <span>•</span>
                 <span>{userInfo?.videoCount} videos</span>
               </div>
@@ -143,7 +203,9 @@ const Dashboard = () => {
               }
               onClick={handletoggleSubscribed}
               >
-                  Subscribe
+                {
+                  subscribedReaction? (<h1>Subscribed</h1>): (<h1>Subscribe</h1>)
+                }
                 </button>
                 <button className="rounded-full px-4 py-2 bg-gray-200">
                  Join
@@ -165,10 +227,12 @@ const Dashboard = () => {
             Manage channel
           </button>
         </div>): (<div className="mt-4 flex md:hidden gap-2">
-          <button className="w-1/2 py-2 bg-gray-200 rounded-full">
-            Subscribe
+          <button className={`w-1/2 py-2  rounded-full ${subscribedReaction? "bg-red-500" : "bg-gray-200"}`}>
+             {
+                  subscribedReaction? (<h1>Subscribed</h1>): (<h1>Subscribe</h1>)
+                }
           </button>
-          <button className="w-1/2 py-2 bg-gray-200 rounded-full">
+          <button className=" opacity-70 cursor-not-allowed w-1/2 py-2 bg-gray-200 rounded-full">
            Join
           </button>
         </div>)
