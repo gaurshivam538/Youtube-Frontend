@@ -2,7 +2,7 @@ import React from 'react'
 
 function Logo() {
   return (
-    <div className='flex'>
+    <div className='flex ml-2'>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         id="yt-ringo2-svg_yt10"

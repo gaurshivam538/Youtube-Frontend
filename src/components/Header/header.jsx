@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import Container from "../container/Container";
-import Userprofile from "../Userprofile/Userprofile";
+import { GiHamburgerMenu } from "react-icons/gi";
 
 function Header() {
   const [searchItem, setSearchItem] = useState("");
@@ -42,9 +42,16 @@ function Header() {
     >
       <Container>
         <nav className={`flex items-center justify-between  lg:px-6 `}>
+          <div className="flex gap-x-4 items-center ">
+            <div className="p-2 ml-0 hover:bg-gray-200  rounded-full">
+            <GiHamburgerMenu 
+            className="lg:w-6 lg:h-6 cursor-pointer"
+            />
+          </div>
           <Link to="/">
             <Logo />
           </Link>
+          </div>
 
           <div className="flex items-center border  rounded-full bg-white lg:w-1/2  border-gray-600">
             <Input

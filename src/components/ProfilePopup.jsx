@@ -82,15 +82,15 @@ const ProfilePopup = () => {
                             </div>
                             <div className=''>
                                 <h3 className='mt-2'>
-                                    {`${userInfo.userFullname}`}
+                                    {`${userInfo?.userFullname}`}
                                 </h3>
                                 <h3 className=''>
-                                    {`${userInfo.username}`}
+                                    {`${userInfo?.username}`}
                                 </h3>
                             </div>
                         </div>
                         <div className='ml-12 mt-1 cursor-pointer'>
-                            <Link to={`/${userInfo.username}`} className='text-blue-600 
+                            <Link to={`/${userInfo?.username}`} className='text-blue-600 
                             '
                                 onClick={() => setopen(!open)}
                             >
