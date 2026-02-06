@@ -19,15 +19,19 @@ function HomePage() {
     const fetchVideoInfo = async () => { 
       try { 
         setLoading(true); 
-        const response = await getAllVideos(); 
+        let response = await getAllVideos(); 
 
+        response = Array.isArray(data) ? data: [];
         setVideoInfo(response); 
-        setshortVideoInfo(response.filter((v) => v.category === "short")); 
+        if (videoInfo.length >= 0) {
+          setshortVideoInfo(response.filter((v) => v.category === "short")); 
         setlongVideoInfo(response.filter((v) => v.category === "long")); 
+        }
+        
       } catch (error) { 
         console.error(error); 
       } finally { 
-        setLoading(false); 
+        setLoading(true); 
       } 
     };
 
@@ -35,21 +39,30 @@ function HomePage() {
   }, []);
 
   return ( 
-    <div className="flex h-screen w-full overflow-hidden">     
-      <div className="w-56 h-screen flex-shrink-0 overflow-y-auto">
+    <div className=" flex h-screen w-full overflow-hidden"> 
+    <Sidebar1/>    
+      {/* <div className="w-56 h-screen flex-shrink-0 overflow-hidden">
         <Sidebar2 /> 
-      </div> 
+      </div>  */}
 
-      <div className="flex-1 h-full overflow-y-auto bg-white text-black">
+      <div className="  mt-5 flex-1 h-full overflow-y-auto bg-white text-black">
         <div className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading 
               ? Array.from({ length: 20 }).map((_, i) => (
                   <HomeLongVideoSkeleton key={i} />
                 )) 
-              : videoInfo.map((video) => (
+              :( 
+                Array.isArray(videoInfo) && videoInfo.length > 0 ?
+                videoInfo.map((video) => (
                   <HomeLongVideoCard key={video._id} data={video} />
-                ))}
+                ))
+              :(<p
+                className='flex justify-center  bg-gray-400 shadow-md rounded-xl'
+              >
+                There is no video.....
+              </p>)
+              )}
           </div>
         </div>
       </div>

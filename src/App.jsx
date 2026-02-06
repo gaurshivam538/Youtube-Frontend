@@ -32,8 +32,9 @@ function App() {
   }, [authStatus]);
 
   return (
-    <div className="text-black">
+    <div className="text-black h-screen overflow-hidden">
       <Header />
+      
       <main>
         <Outlet />
       </main>
