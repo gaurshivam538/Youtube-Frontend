@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/auth.slice';
 import { subscribedStatus, toggleSubscriber } from '../../services/subscribed.service';
 import { setSubscribedCount } from '../../store/subscribedaction.slice';
+import Sidebar1 from '../sidebar/Sidebar1';
 
 const Dashboard = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -19,6 +20,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const authUserData = useSelector((state) => state.auth.userData);
   const SubscriberCount = useSelector((state) => state.subscribe.subscribedCount);
+  const isSidebarStatus = useSelector((state) => state.ui.isSidebarOpen);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -130,12 +132,7 @@ const Dashboard = () => {
 
             if (res?.data?.message === "Unsubscribed Successfully") {
               setSubscribedReaction(false);
-      //         setDiffProfSubCount((prev) => {
-      //   if (prev === 0) {
-      //     return;
-      //   }
-      //   return prev-1;
-      // })
+          
               return;
             }
 
@@ -149,6 +146,12 @@ const Dashboard = () => {
   const isHomeActive = homeMatch || featuresMatch;
 
   return (
+    <div className='flex flex-row h-full w-full'>
+      {
+        !isSidebarStatus && (<Sidebar1/>)
+      }
+      
+
     <div className="w-full h-full">
       {/* USER INFO */}
       <div className="flex flex-col w-[85%] mx-auto mt-10">
@@ -159,7 +162,7 @@ const Dashboard = () => {
             {/* ✅ FIXED AVATAR */}
             <div
   className="
-    rounded-full overflow-hidden bg-gray-300 shrink-0
+    rounded-full overflow-hidden  shrink-0
     w-[105px] h-[105px]
     sm:w-[120px] sm:h-[120px]
     md:w-[160px] md:h-[160px]
@@ -273,6 +276,7 @@ const Dashboard = () => {
       <div className="w-[85%] mx-auto mt-4">
         <Outlet />
       </div>
+    </div>
     </div>
   );
 };

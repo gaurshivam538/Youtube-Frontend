@@ -4,13 +4,15 @@ import authReducer from "./auth.slice"
 import uploadReducer from "./upload.slice"
 import emailReducer from "./emailsave.slice"
 import subscribeReducer from "./subscribedaction.slice"
+import sidebarReducer from "./sidebar.slice"
 
 const store = configureStore({
     reducer: {
         auth:authReducer,
         upload:uploadReducer,
         email: emailReducer,
-        subscribe: subscribeReducer
+        subscribe: subscribeReducer,
+        ui:sidebarReducer,
     }
 })
 

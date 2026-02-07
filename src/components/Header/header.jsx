@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Logo, Input, Logout, CreateMenu, ProfilePopup } from "../index";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import Container from "../container/Container";
 import { GiHamburgerMenu } from "react-icons/gi";
+import { toggleSidebar } from "../../store/sidebar.slice";
+
 
 function Header() {
   const [searchItem, setSearchItem] = useState("");
   const [isFixed, setIsFixed] = useState(false);
+  const dispatch = useDispatch();
 
   const authStatus = useSelector((state) => state.auth.status);
   // const authData = useSelector((state) =>state.upload.uploads);
@@ -46,6 +49,7 @@ function Header() {
             <div className="p-2 ml-0 hover:bg-gray-200  rounded-full">
             <GiHamburgerMenu 
             className="lg:w-6 lg:h-6 cursor-pointer"
+            onClick={()=>dispatch(toggleSidebar())}
             />
           </div>
           <Link to="/">

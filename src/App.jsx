@@ -4,9 +4,15 @@ import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import socket from "./Socket";
 import { decrementCount, incrementCount } from "./store/subscribedaction.slice";
+import Sidebar2 from "../src/components/sidebar/Sidebar2"
+import { useLocation } from "react-router-dom";
 function App() {
   const dispatch = useDispatch();
   const authStatus = useSelector((state) => state.auth.status);
+    const isSidebarStatus = useSelector((state) => state.ui.isSidebarOpen);
+    const loaction = useLocation();
+    const isWatchPage = location.pathname.startsWith("/watch");
+  
   useEffect(() => {
     if (!authStatus) return;
 
@@ -32,13 +38,21 @@ function App() {
   }, [authStatus]);
 
   return (
-    <div className="text-black h-screen overflow-hidden">
-      <Header />
-      
-      <main>
-        <Outlet />
-      </main>
-    </div>
+  <div className="w-full h-screen flex flex-col overflow-hidden">
+  <Header />
+  <div className="flex flex-1 w-full overflow-hidden">
+    {
+      isSidebarStatus?( <div className={`z-10 w-56 mt-3 flex-shrink-0 ${isWatchPage ? "fixed": "relative"} overflow-hidden` }>
+      <Sidebar2 />
+    </div>): (<div></div>)
+    }
+   
+    <main className="flex-1 mt-2">
+      <Outlet />
+    </main>
+  </div>
+</div>
+
 
   );
 }

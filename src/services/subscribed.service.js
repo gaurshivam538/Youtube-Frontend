@@ -38,7 +38,6 @@ const getSubsribedChannel = async(subscriberId) => {
             }
         )
 
-        console.log(res);
         return res;
     } catch (error) {
         console.log("Subscribed channel ApiError ->",error)
