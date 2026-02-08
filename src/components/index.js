@@ -14,6 +14,7 @@ import ProtectedRoute from "./protectedRoute"
 import ForgotPassword from "./forgotPassword"
 import UpdatePassword from "./updatePassword"
 import UpdatePasswordPageProtectedRoute from "./UpdatePasswordPageProtectedRoute"
+import Subscriptions from "./Subscriptions"
 export  {
     Logo,
     Input,
@@ -30,6 +31,7 @@ export  {
     ForgotPassword,
     UpdatePassword,
     UpdatePasswordPageProtectedRoute,
+    Subscriptions,
 
 }
 

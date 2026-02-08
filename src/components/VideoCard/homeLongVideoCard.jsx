@@ -35,6 +35,14 @@ function HomeLongVideoCard({ data }) {
   //     video.src = hlsUrl;
   //   }
   // }, [data.videoFile]);
+  // let myDate = new Date();
+//   console.log(myDate.toString());
+// console.log(myDate.toDateString());
+// console.log(myDate.toLocaleDateString());
+// console.log(myDate.toLocaleTimeString());
+
+  // let date = new Date(data.createdAt);
+  // let hai = timeAgo(data.createdAt);
 
   return (
     <Link to={`watch/?v=${data._id}`}>
@@ -70,7 +78,7 @@ function HomeLongVideoCard({ data }) {
               {data.owner.username}
             </p>
             <p className="text-gray-400 text-xs">
-              {data.views} • {data.createdAt}
+              {data.views} views • {timeAgo(data.createdAt)}
             </p>
           </div>
         </div>
@@ -99,3 +107,27 @@ export {
   HomeLongVideoCard,
   timingFormat
 };
+
+
+function timeAgo(dateInput) {
+  const now = new Date();
+  const past = new Date(dateInput);
+  const seconds = Math.floor((now - past) / 1000);
+  const intervals = [
+    { label: "year", seconds: 31536000 },
+    { label: "month", seconds: 2592000 },
+    { label: "day", seconds: 86400 },
+    { label: "hour", seconds: 3600 },
+    { label: "minute", seconds: 60 },
+    { label: "second", seconds: 1 }
+  ];
+
+  for (const interval of intervals) {
+    const count = Math.floor(seconds / interval.seconds);
+    if (count >= 1) {
+      return `${count} ${interval.label}${count > 1 ? "s" : ""} ago`;
+    }
+  }
+
+  return "just now";
+}

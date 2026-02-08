@@ -27,6 +27,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { generateNewAccessToken } from "../../services/user.service";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { getVideoBySubscribedChannel } from "../../services/video.service";
 
 
 const Sidebar2 = () => {
@@ -59,12 +60,13 @@ const Sidebar2 = () => {
 
       if (res.data.statusCode === 200) {
         setLoading(false);
-        console.log(res?.data?.data);
         setuserSubscribedData(res?.data?.data);
       }
     }
     fetchData();
   }, []);
+
+  
   return (
     <div className=" bg-white w-56 flex-1 overflow-hidden h-full hover:overflow-y-auto">
       <div className="flex flex-col gap-y-2 pt-2 pb-2 mt-4 pl-4 ">
@@ -86,11 +88,18 @@ const Sidebar2 = () => {
 
         {/* Subscriptions */}
         <div className="h-[1px] bg-gray-200 w-full"></div>
+
         <div className="flex flex-col gap-y-2 w-full">
-          <div className="flex items-center gap-x-3 w-full  rounded-2xl pl-5  py-2 hover:bg-gray-300 cursor-pointer">
+          <Link
+          to = "/feed/subscriptions"
+          >
+          <div className="flex items-center gap-x-3 w-full  rounded-2xl pl-5  py-2 hover:bg-gray-300 cursor-pointer"
+          >
             <p className="text-base text-gray-900">Subscriptions</p>
             <FaAngleRight className="h-4 w-4" />
           </div>
+          </Link>
+
           {
             loading ? Array.from({length:6}).map((_, i) => (
               <SubscribedDetailsSkeleton key = {i}/>
@@ -100,6 +109,7 @@ const Sidebar2 = () => {
               to = {`/${user.username}`}
               >
                  <div
+                 key = {user._id}
             className="flex items-center gap-x-3 w-full rounded-2xl pl-3 py-1 pr-2 hover:bg-gray-300 cursor-pointer"
           >
             <div className=" rounded-full w-8 h-8 overflow-hidden  shrink-0">
