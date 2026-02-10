@@ -19,7 +19,7 @@ import UserDashboardPage from './components/pages/UserDashboard.jsx'
 import DashboardVideosPage from './components/DashboardComponenet/DashboardPages/DashboardVideosPage.jsx'
 import DashboardShortPage from './components/DashboardComponenet/DashboardPages/DashboardShortPage.jsx'
 import UploadedVideoAndAllVideo from './components/SpecificUserAllVideo/uploadedVideoAndAllVideo.jsx'
-import { ProtectedRoute ,ForgotPassword, UpdatePassword, UpdatePasswordPageProtectedRoute, Subscriptions} from './components/index.js'
+import { ProtectedRoute ,ForgotPassword, UpdatePassword, UpdatePasswordPageProtectedRoute, SubscriptionsVideos, SubscriptionChannels} from './components/index.js'
 const router = createBrowserRouter([
   {
     path: "/",
@@ -92,7 +92,11 @@ const router = createBrowserRouter([
           },
           {
             path: "/feed/subscriptions",
-            element: <Subscriptions/>
+            element: <SubscriptionsVideos/>
+          },
+          {
+            path: "feed/channels",
+            element: <SubscriptionChannels/>
           }
         ]
       }

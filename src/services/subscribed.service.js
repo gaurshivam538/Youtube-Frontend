@@ -37,7 +37,7 @@ const getSubsribedChannel = async(subscriberId) => {
                 withCredentials: true,
             }
         )
-
+        console.log(res);
         return res;
     } catch (error) {
         console.log("Subscribed channel ApiError ->",error)

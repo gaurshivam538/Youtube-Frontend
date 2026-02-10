@@ -103,11 +103,6 @@ const timingFormat = (sec) => {
   } return `${m}:${s}`;
 }
 
-export {
-  HomeLongVideoCard,
-  timingFormat
-};
-
 
 function timeAgo(dateInput) {
   const now = new Date();
@@ -131,3 +126,9 @@ function timeAgo(dateInput) {
 
   return "just now";
 }
+
+export {
+  HomeLongVideoCard,
+  timingFormat,
+  timeAgo
+};

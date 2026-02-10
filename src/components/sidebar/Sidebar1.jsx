@@ -37,12 +37,16 @@ const Sidebar1 = () => {
            <p className='text-sm text-gray-500'>Shorts</p>
            
          </div>
+         <Link
+         to = "/feed/subscriptions"
+         >
          <div className='flex flex-col space-y-1 items-center cursor-pointer'>
            <MdOutlineSubscriptions 
            className='h-7 w-7'/>
            <p className='text-sm text-gray-500'>Subscriptions</p>
            {/* <MdSubscriptions /> */}
          </div>
+         </Link>
          <div  className='flex flex-col space-y-1 items-center cursor-pointer'>
            <MdPersonOutline 
             className='h-7 w-7'/>

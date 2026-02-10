@@ -42,7 +42,7 @@ function App() {
   <Header />
   <div className="flex flex-1 w-full overflow-hidden">
     {
-      isSidebarStatus?( <div className={`z-10 w-56 mt-3 flex-shrink-0 ${isWatchPage ? "fixed": "relative"} overflow-hidden` }>
+      isSidebarStatus?( <div className={`z-10 w-56 mt-3 fixed flex-shrink-0 ${isWatchPage ? "fixed": "md:relative lg:relative"} overflow-hidden `  } >
       <Sidebar2 />
     </div>): (<div></div>)
     }

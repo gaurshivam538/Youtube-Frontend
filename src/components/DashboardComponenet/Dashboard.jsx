@@ -191,7 +191,7 @@ const Dashboard = () => {
               </div>
 
               <div className="text-gray-400 text-sm">
-                More about this channel <span className="text-white cursor-pointer">...more</span>
+                More about this channel <span className="text-gray-400 cursor-pointer">...more</span>
               </div>
               {
                 loggedInUser ?( <div className="hidden md:flex gap-2 mt-2">
@@ -293,3 +293,7 @@ const DashboardSkeletonLoader = () => (
     </div>
   </div>
 );
+
+export {
+  DashboardSkeletonLoader
+}

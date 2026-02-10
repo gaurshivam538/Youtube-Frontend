@@ -28,6 +28,7 @@ import { generateNewAccessToken } from "../../services/user.service";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { getVideoBySubscribedChannel } from "../../services/video.service";
+import { logout } from "../../store/auth.slice";
 
 
 const Sidebar2 = () => {
@@ -59,6 +60,8 @@ const Sidebar2 = () => {
       }
 
       if (res.data.statusCode === 200) {
+        console.log(res.data);
+        
         setLoading(false);
         setuserSubscribedData(res?.data?.data);
       }
