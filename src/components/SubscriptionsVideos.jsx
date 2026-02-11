@@ -17,6 +17,7 @@ const SubscriptionsVideos = () => {
             let res = await getVideoBySubscribedChannel(authData?._id);
             setVideoInfo(res?.data?.data);
             if( res?.data?.statusCode === 200){
+                console.log(res?.data?.data);
                 setLoading(false);
             }
         }
@@ -70,7 +71,7 @@ const SubscriptionsVideos = () => {
                                                     {/* Video Details */}
                                                     <div className="flex mt-3 gap-3">
                                                         <img
-                                                            src={video.owner.avatar}
+                                                            src={video.user.avatar}
                                                             alt="channel"
                                                             className="w-9 h-9 rounded-full"
                                                         />

@@ -13,13 +13,14 @@ const ProfilePopup = () => {
     const [open, setopen] = useState(false);
     const authStatus = useSelector((state) => state.auth.status)
     const [userInfo, setUserInfo] = useState({});
+    const [loading, setLoading] = useState(true);
     const menuRef = useRef();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUserData = async () => {
-
+            setLoading(true);
             const res = await serviceUserprofile();
             if (res?.response?.data?.data === "Unauthorized request, Token created") {
                 console.log(res?.response?.data?.data)
@@ -37,7 +38,11 @@ const ProfilePopup = () => {
                     return;
                 }
             }
+            console.log(res?.data);
+            if (res?.data?.statusCode === 200){
             setUserInfo(res?.data?.data);
+            setLoading(false);
+            }
 
         }
         fetchUserData();
@@ -60,7 +65,8 @@ const ProfilePopup = () => {
 
     return (
         <div className='relative' ref={menuRef}>
-            <button
+            {
+                loading? (<ProfileSkeleton/>): (  <button
                 onClick={() => setopen(!open)}
                 className='overflow-hidden rounded-full h-8 w-8 object-cover cursor-pointer'
             >
@@ -69,7 +75,9 @@ const ProfilePopup = () => {
                     className='overflow-hidden'
                 />
 
-            </button>
+            </button>)
+            }
+          
             {
                 open && (
                     <div className=' absolute right-0 mt-2 text-lg w-80 p-4  bg-slate-200 text-black dark:text-white shadow-lg z-30 flex flex-col rounded-xl'>
@@ -115,3 +123,11 @@ const ProfilePopup = () => {
 }
 
 export default ProfilePopup
+
+const ProfileSkeleton = () => {
+  return (
+   <div
+   className='animate-pulse h-10 w-10 bg-gray-300 rounded-full'
+   ></div>
+  );
+};

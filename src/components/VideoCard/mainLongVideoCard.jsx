@@ -97,7 +97,7 @@ function MainLongVideoCard() {
     if (videoInfo?.likes !== undefined) {
       setLikesCount(videoInfo?.likes);
     }
-  }, [videoInfo.likes]);
+  }, [videoInfo?.likes]);
 
 
   /* ================= 2 HLS STREAM ATTACH ================= */
