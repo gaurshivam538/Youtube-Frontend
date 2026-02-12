@@ -1,78 +1,113 @@
-import React, { useEffect, useState } from 'react'; 
-import { getAllVideos } from '../../services/video.service'; 
-import {HomeLongVideoCard} from '../VideoCard/homeLongVideoCard'; 
-import HomeShortVideoCard from '../VideoCard/homeShortVideoCard'; 
-import { useSelector } from 'react-redux'; 
-import Sidebar1 from '../sidebar/Sidebar1'; 
-import Sidebar2 from '../sidebar/Sidebar2';  
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { getAllVideos } from "../../services/video.service";
+import { HomeLongVideoCard } from "../VideoCard/homeLongVideoCard";
+import { useSelector } from "react-redux";
+import Sidebar1 from "../sidebar/Sidebar1";
 
-function HomePage() { 
-  const [videoInfo, setVideoInfo] = useState([]); 
-  const [shortVideoInfo, setshortVideoInfo] = useState([]); 
-  const [longVideoInfo, setlongVideoInfo] = useState([]); 
-  const [loading, setLoading] = useState(true); 
+function HomePage() {
+  const [videoInfo, setVideoInfo] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  const userData = useSelector((state) => state.auth.userData); 
   const isSidebarStatus = useSelector((state) => state.ui.isSidebarOpen);
-  
 
-  useEffect(() => { 
-    const fetchVideoInfo = async () => { 
-      try { 
-        setLoading(true); 
-        let response = await getAllVideos(); 
-        response = Array.isArray(response) ? response: [];
+  const scrollRef = useRef(null);
 
-        setVideoInfo(response); 
-        if (videoInfo.length >= 0) {
-          setshortVideoInfo(response.filter((v) => v.category === "short")); 
-        setlongVideoInfo(response.filter((v) => v.category === "long")); 
+  const fetchVideoInfo = useCallback(async () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+
+    try {
+      const result = await getAllVideos(page);
+
+      if (result?.status === 200) {
+        const response = result?.data?.videos || [];
+
+        setVideoInfo((prev) => {
+          const newUniqueVideos = response.filter(
+            (newVideo) =>
+              !prev.some((oldVideo) => oldVideo._id === newVideo._id)
+          );
+
+          return [...prev, ...newUniqueVideos];
+        });
+
+        if (page >= result?.data?.totalPages) {
+          setHasMore(false);
+        } else {
+          setPage((prev) => prev + 1);
         }
-        
-      } catch (error) { 
-        console.error(error); 
-      } finally { 
-        setLoading(false); 
-      } 
-    };
+      }
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+    }
 
-    fetchVideoInfo(); 
+    setLoading(false);
+  }, [page, hasMore, loading]);
+
+  //  Initial Load
+  useEffect(() => {
+    fetchVideoInfo();
   }, []);
 
-  return ( 
-    <div className=" flex h-screen w-full overflow-hidden"> 
-    {
-      !isSidebarStatus &&(<Sidebar1/> )
-    }
-       
-     
-      <div className="  mt-5 flex-1 h-full overflow-y-auto bg-white text-black">
+  //  Infinite Scroll
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      if (
+        container.scrollTop + container.clientHeight >=
+        container.scrollHeight - 200
+      ) {
+        fetchVideoInfo();
+      }
+    };
+
+    container.addEventListener("scroll", handleScroll);
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+    };
+  }, [fetchVideoInfo]);
+
+  return (
+    <div className="flex h-screen w-full overflow-hidden">
+      {!isSidebarStatus && <Sidebar1 />}
+
+      <div
+        ref={scrollRef}
+        className="mt-5 flex-1 h-full overflow-y-auto bg-white text-black"
+      >
         <div className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading 
-              ? Array.from({ length: 20 }).map((_, i) => (
-                  <HomeLongVideoSkeleton key={i} />
-                )) 
-              :( 
-                Array.isArray(videoInfo) && videoInfo.length > 0 ?
-                videoInfo.map((video) => (
-                  <HomeLongVideoCard key={video._id} data={video} />
-                ))
-              :(<p
-                className='flex justify-center  bg-gray-400 shadow-md rounded-xl'
-              >
-                There is no video.....
-              </p>)
-              )}
+            {videoInfo.length > 0 &&
+              videoInfo.map((video) => (
+                <HomeLongVideoCard key={video._id} data={video} />
+              ))}
+
+            {loading &&
+              Array.from({ length: 4 }).map((_, i) => (
+                <HomeLongVideoSkeleton key={i} />
+              ))}
           </div>
+
+          {!hasMore && (
+            <p className="text-center mt-5 text-gray-500">
+               No more videos
+            </p>
+          )}
         </div>
       </div>
     </div>
-  ); 
+  );
 }
 
 export default HomePage;
 
+// 🔥 Skeleton Loader
 const HomeLongVideoSkeleton = () => {
   return (
     <div className="animate-pulse space-y-3">

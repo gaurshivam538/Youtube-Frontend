@@ -67,7 +67,7 @@ function HomeLongVideoCard({ data }) {
         {/* Video Details */}
         <div className="flex mt-3 gap-3">
           <img
-            src={data.owner.avatar}
+            src={data.owner?.avatar}
             alt="channel"
             className="w-9 h-9 rounded-full"
           />
@@ -75,7 +75,7 @@ function HomeLongVideoCard({ data }) {
           <div>
             <h3 className="font-semibold text-sm">{data.title}</h3>
             <p className="text-gray-400 text-xs mt-1">
-              {data.owner.username}
+              {data.owner?.username}
             </p>
             <p className="text-gray-400 text-xs">
               {data.views} views • {timeAgo(data.createdAt)}
