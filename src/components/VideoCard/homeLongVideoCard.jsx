@@ -46,7 +46,7 @@ function HomeLongVideoCard({ data }) {
 
   return (
     <Link to={`watch/?v=${data._id}`}>
-      <div className="w-auto h-full cursor-pointer z-20 pt-2 text-black">
+      <div className="w-auto h-full cursor-pointer z-20 pt-2 text-black  hover:bg-gray-400  hover:p-2 rounded-lg">
         {/* Thumbnail Box */}
         <div className="relative rounded-xl overflow-hidden aspect-video">
           <video

@@ -146,13 +146,13 @@ const Dashboard = () => {
   const isHomeActive = homeMatch || featuresMatch;
 
   return (
-    <div className='flex flex-row h-full w-full'>
+    <div className='flex flex-row w-full overflow-hidden h-screen'>
       {
         !isSidebarStatus && (<Sidebar1 />)
       }
 
 
-      <div className="w-full h-full">
+      <div className="w-full overflow-y-auto h-full">
         {/* USER INFO */}
         <div className="flex flex-col w-[85%] mx-auto mt-10">
           {loading ? (
