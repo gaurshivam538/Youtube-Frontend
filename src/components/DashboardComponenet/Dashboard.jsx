@@ -39,9 +39,9 @@ const Dashboard = () => {
             return;
           }
 
-          if (refresh?.data?.message === "Access Token is created SuccessFully") {
-            res = await userDashboard(username);
-          }
+          // if (refresh?.data?.message === "Access Token is created SuccessFully") {
+          //   res = await userDashboard(username);
+          // }
         }
 
         if (res?.status === 200) {

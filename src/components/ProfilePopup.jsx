@@ -22,8 +22,24 @@ const ProfilePopup = () => {
         const fetchUserData = async () => {
             setLoading(true);
             const res = await serviceUserprofile();
+            if (res?.message === "Request failed with status code 401") {
+                const res5 = await generateNewAccessToken();
+                if (res5?.response?.data?.data === "Refresh Token can not provide please login") {
+                    alert("Your refresh Token expiry, please Login and useSpecific services");
+                    dispatch(logout());
+                    navigate("/login");
+                    return;
+                }
+                if (res5?.data?.message === "Access Token is created SuccessFully") {
+                    const res6 = await serviceUserprofile();
+                    console.log(res6)
+                    setUserInfo(res6?.data?.data);
+                    return;
+                }
+            return;
+            }
+            
             if (res?.response?.data?.data === "Unauthorized request, Token created") {
-                console.log(res?.response?.data?.data)
                 const res2 = await generateNewAccessToken();
                 if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
                     alert("Your refresh Token expiry, please Login and useSpecific services");
@@ -38,7 +54,6 @@ const ProfilePopup = () => {
                     return;
                 }
             }
-            console.log(res?.data);
             if (res?.data?.statusCode === 200){
             setUserInfo(res?.data?.data);
             setLoading(false);
