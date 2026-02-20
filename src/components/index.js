@@ -16,6 +16,7 @@ import UpdatePassword from "./updatePassword"
 import UpdatePasswordPageProtectedRoute from "./UpdatePasswordPageProtectedRoute"
 import SubscriptionsVideos from "./SubscriptionsVideos"
 import SubscriptionChannels from "./SubscrptionChannel"
+import Notification from "./Notification"
 export  {
     Logo,
     Input,
@@ -34,6 +35,7 @@ export  {
     UpdatePasswordPageProtectedRoute,
     SubscriptionsVideos,
     SubscriptionChannels,
+    Notification,
 
 }
 

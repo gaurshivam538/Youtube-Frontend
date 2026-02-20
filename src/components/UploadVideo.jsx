@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { startUpload, updateProgress, uploadComplete, uploadFailed, } from "../store/upload.slice";
 import { v4 as uuidv4 } from "uuid";
 import { useSelector } from "react-redux";
+import { addNotification } from "../services/notification.service";
 const UploadVideo = () => {
 
     const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
@@ -62,7 +63,8 @@ const UploadVideo = () => {
             }))
 
             if (result.status == 200) {
-
+                console.log(result);
+                const res = await addNotification(authData?._id, "UPLOAD",result?.data?.data?._id,"ViDEO", result?.data?.data?.title, "", result?.data?.data?.thumbnail, authData?.avatar );
                 reset();
             }
 

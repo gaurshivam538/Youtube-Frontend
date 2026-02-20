@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Logo, Input, Logout, CreateMenu, ProfilePopup } from "../index";
+import { Logo, Input, Logout, CreateMenu, ProfilePopup, Notification } from "../index";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
@@ -70,7 +70,7 @@ function Header() {
             </button>
           </div>
 
-          <ul className="flex items-center gap-3">
+          <ul className="flex items-center gap-x-4">
               {navItems.map(
                 (item) =>
                   item.active && (
@@ -87,6 +87,7 @@ function Header() {
 
             {/* <li>{authStatus && <Logout />}</li> */}
             <li>{authStatus && <CreateMenu/>}</li>
+            <li>{authStatus && <Notification/>}</li>
             <li>{authStatus && <ProfilePopup/>}</li>
           </ul>
         </nav>
