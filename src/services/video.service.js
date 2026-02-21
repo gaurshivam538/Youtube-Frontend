@@ -46,10 +46,10 @@ const uploadVideo = async (title, description, videoFile, thumbnail, category, i
     }
 }
 
-const getSpecificVideo = async (videoId) => {
+const getSpecificVideo = async (videoId, signal) => {
     try {
         const res = await axios.get(`
-            /api/v1/users/get-specific-video/${videoId}`,
+            /api/v1/users/get-specific-video/${videoId}?signal=${signal}`,
             { withCredentials: true },
         )
         return res.data.data[0];

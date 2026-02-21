@@ -22,7 +22,18 @@ import { getUserChannelSubscribed, toggleSubscriber } from "../../services/subsc
 const REDIRECT_DELAY = 6;
 function MainLongVideoCard() {
   const [params] = useSearchParams();
-  const videoId = params.get("v");
+  let videoId = params.get("v");
+  let signal;
+
+  if (videoId) {
+    signal = "randomVideo";
+  }
+
+  if (!videoId) {
+    videoId = params.get("notification");
+    signal = "notificationVideo";
+  }
+  
   const videoRef = useRef(null);
   const progressRef = useRef(null);
   const location = useLocation();
@@ -56,7 +67,7 @@ function MainLongVideoCard() {
 
     const fetchVideo = async () => {
       try {
-        let res = await getSpecificVideo(videoId);
+        let res = await getSpecificVideo(videoId, signal);
         if (res?.response?.data?.data === "Unauthorized request, Token created") {
           const res2= await generateNewAccessToken();
           if (res2?.response?.data?.data === "Refresh Token can not provide please login") {
@@ -558,6 +569,7 @@ function MainLongVideoCard() {
               poster={videoInfo?.thumbnail}
               onTimeUpdate={handleTimeUpdate}
               className="w-full h-full object-contain"
+              onClick={togglePlay}
             />
 
             {isBuffering && (

@@ -1,319 +1,208 @@
 import { useForm } from "react-hook-form";
-import { Input } from "./index"
+import { Input } from "./index";
 import { uploadVideo } from "../services/video.service";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { startUpload, updateProgress, uploadComplete, uploadFailed, } from "../store/upload.slice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  startUpload,
+  updateProgress,
+  uploadComplete,
+  uploadFailed,
+} from "../store/upload.slice";
 import { v4 as uuidv4 } from "uuid";
-import { useSelector } from "react-redux";
 import { addNotification } from "../services/notification.service";
+
 const UploadVideo = () => {
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
-    const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
-    const [videoFile, setVideoFile] = useState(null);
-    const [thumbnailFile, setThumbnailFile] = useState(null);
-    const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
-    const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(null);
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const authData = useSelector((state) => state.auth.userData);
-    // const uploadData = useSelector((state) => state.upload.uploads);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
+  const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(null);
 
-    const handleVideoFileChange = (e) => {
-        const selectFile = e.target.files[0];
-        if (!selectFile) return;
-        setVideoFile(selectFile);
-        setVideoPreviewUrl(URL.createObjectURL(selectFile))//This line of code take the preview of the video file
-    }
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const authData = useSelector((state) => state.auth.userData);
 
-    const handleThumbnailFileChange = (e) => {
-        const selectFile = e.target.files[0];
-        if (!selectFile) return;
-        setThumbnailFile(selectFile);
-        setThumbnailPreviewUrl(URL.createObjectURL(selectFile));
-    }
+  /* ---------- FILE HANDLERS ---------- */
 
+  const handleVideoFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setVideoPreviewUrl(URL.createObjectURL(file));
+  };
 
-    const onSubmit = async (data) => {
-        const uploadId = uuidv4();
-        dispatch(
-            startUpload({
-                id: uploadId,
-                title: data.title,
-            })
-        )
+  const handleThumbnailFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setThumbnailPreviewUrl(URL.createObjectURL(file));
+  };
 
-        navigate(`/getallfiles?username=${authData.username}`);
+  /* cleanup object URLs */
+  useEffect(() => {
+    return () => {
+      if (videoPreviewUrl) URL.revokeObjectURL(videoPreviewUrl);
+      if (thumbnailPreviewUrl) URL.revokeObjectURL(thumbnailPreviewUrl);
+    };
+  }, [videoPreviewUrl, thumbnailPreviewUrl]);
 
-        try {
+  /* ---------- SUBMIT ---------- */
 
-            const result = await uploadVideo(data.title, data.description, data.video[0], data.thumbnail[0], data.category, data.isPublished, (progress) => {
-                dispatch(updateProgress({
-                    id: uploadId,
-                    progress
-                }))
-            });
+  const onSubmit = async (data) => {
+    const uploadId = uuidv4();
 
-            const uploadedVideoId = result.data.data._id;
+    dispatch(startUpload({ id: uploadId, title: data.title }));
+    navigate(`/getallfiles?username=${authData.username}`);
 
-            dispatch(uploadComplete({
-                id: uploadId,
-                videoId: uploadedVideoId,
-            }))
-
-            if (result.status == 200) {
-                console.log(result);
-                const res = await addNotification(authData?._id, "UPLOAD",result?.data?.data?._id,"ViDEO", result?.data?.data?.title, "", result?.data?.data?.thumbnail, authData?.avatar );
-                reset();
-            }
-
-        } catch (err) {
-            dispatch(uploadFailed({
-                id: uploadId,
-                error: err.message
-            }))
+    try {
+      const result = await uploadVideo(
+        data.title,
+        data.description,
+        data.video[0],
+        data.thumbnail?.[0],
+        data.category,
+        data.isPublished,
+        (progress) => {
+          dispatch(updateProgress({ id: uploadId, progress }));
         }
+      );
 
+      const uploadedVideoId = result.data.data._id;
+
+      dispatch(uploadComplete({
+        id: uploadId,
+        videoId: uploadedVideoId,
+      }));
+
+      if (result.status === 200) {
+        await addNotification(
+          authData?._id,
+          "UPLOAD",
+          uploadedVideoId,
+          "VIDEO",
+          result?.data?.data?.title,
+          "New video uploaded",
+          result?.data?.data?.thumbnail,
+          authData?.avatar
+        );
+        reset();
+        setVideoPreviewUrl(null);
+        setThumbnailPreviewUrl(null);
+      }
+
+    } catch (err) {
+      dispatch(uploadFailed({
+        id: uploadId,
+        error: err.message
+      }));
     }
+  };
 
-    const videoFormat = ["video/mp4", "video/webm", "video/ogg", "video/mov", "video/mkv"];
-    const thumbnailFormat = ["image/jpg", "image/jpeg", "image/png", "image/webp"];
+  const videoFormat = ["video/mp4", "video/webm", "video/ogg", "video/quicktime", "video/x-matroska"];
+  const thumbnailFormat = ["image/jpg", "image/jpeg", "image/png", "image/webp"];
 
-    return (
-        /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
-        <form onSubmit={handleSubmit(onSubmit)} className="">
-            {/* register your input into the hook by invoking the "register" function */}
-            <div className="flex flex-col w-[70%] lg:w-[50%] h-1/2 mx-auto shadow-md my-4   p-6 rounded-lg">
-                <div className="mb-3">
-                    {
-                        videoFile && videoFile.type.startsWith("video") ?
-                            (
-                                <div className="flex justify-center">
-                                    <video
-                                        controls
-                                        src={videoPreviewUrl}
-                                        className="w-32 h-20 rounded"
-                                    />
-                                    <Input
-                                        type="file"
-                                        lable="VideoFile"
-                                        placeholder="Upload File"
-                                        className="shadow-sm mx-2"
-                                        {
-                                        ...register("video", {
-                                            required: "Please Upload a video",
-                                            validate: {
-                                                checkFormat: (value) => {
-                                                    const file = value[0];
-                                                    if (!file) {
-                                                        return "Please Select a File"
-                                                    }
-                                                    if (!videoFormat.includes(file.type)) {
-                                                        return "Please Upload  only this type formated -> mp4, webm, ogg", "mov", "mkv";
-                                                    }
-                                                    return true;
-                                                }
-                                            },
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="flex flex-col w-[70%] lg:w-[50%] mx-auto shadow-md my-4 p-6 rounded-lg space-y-4">
 
-                                            onChange: (e) => { handleVideoFileChange(e) }
-                                        }
+        {/* VIDEO */}
+        <div className="flex h-20 w-30 justify-center">
+          {videoPreviewUrl && (
+            <video controls src={videoPreviewUrl} className="w-40 mb-2 rounded" />
+          )}
 
-                                        )}
+          <Input
+            type="file"
+            {...register("video", {
+              required: "Please upload a video",
+              validate: (value) => {
+                const file = value?.[0];
+                if (!file) return "Select a file";
+                if (!videoFormat.includes(file.type))
+                  return "Only mp4, webm, ogg, mov, mkv allowed";
+                return true;
+              },
+              onChange: handleVideoFileChange
+            })}
+          />
 
-                                    />
-                                </div>
-                            ) : (
-                                <Input
-                                    type="file"
-                                    lable="VideoFile"
-                                    placeholder="Upload File"
-                                    className="shadow-sm "
-                                    {
-                                    ...register("video", {
-                                        required: "Please Upload a video",
-                                        validate: {
-                                            checkFormat: (value) => {
-                                                const file = value[0];
-                                                if (!file) {
-                                                    return "Please Select a File"
-                                                }
-                                                if (!videoFormat.includes(file.type)) {
-                                                    return "Please Upload  only this type formated -> mp4, webm, ogg", "mov", "mkv";
-                                                }
-                                                return true;
-                                            }
-                                        },
+          {errors.video && (
+            <p className="text-red-500 mt-2">{errors.video.message}</p>
+          )}
+        </div>
 
-                                        onChange: (e) => { handleVideoFileChange(e) }
-                                    }
+        {/* THUMBNAIL */}
+        <div className="flex  h-20 ">
+          {thumbnailPreviewUrl && (
+            <img src={thumbnailPreviewUrl} className=" h-full w-30 mb-2 rounded" />
+          )}
 
-                                    )}
+          <Input
+            type="file"
+            {...register("thumbnail", {
+              validate: (value) => {
+                const file = value?.[0];
+                if (!file) return true;
+                if (!thumbnailFormat.includes(file.type))
+                  return "Only jpg, jpeg, png, webp allowed";
+                return true;
+              },
+              onChange: handleThumbnailFileChange
+            })}
+          />
 
-                                />
-                            )
+          {errors.thumbnail && (
+            <p className="text-red-500 mt-2">{errors.thumbnail.message}</p>
+          )}
+        </div>
 
-                    }
+        {/* TITLE */}
+        <div >
+        <Input
+          placeholder="Video title"
+          
+          {...register("title", { required: "Title is required" })}
+        />
+        {errors.title && <p className="text-red-500">{errors.title.message}</p>}
+        </div>
+        {/* DESCRIPTION */}
+        <div>
+        <Input
+          placeholder="Description"
+          {...register("description", { required: "Description is required" })}
+        />
+        {errors.description && <p className="text-red-500">{errors.description.message}</p>}
+        </div>
+        {/* CATEGORY */}
+        <div>
+        <select
+          className="w-full rounded-md my-3 p-2 shadow-sm"
+          {...register("category", { required: "Category required" })}
+        >
+          <option value="">Select Category</option>
+          <option value="short">Short</option>
+          <option value="video">Video</option>
+        </select>
+        {errors.category && <p className="text-red-500">{errors.category.message}</p>}
+        </div>
+        {/* VISIBILITY */}
+        <div className="flex gap-4 my-3">
+          <label className="flex gap-2">
+            <input type="radio" value="true" {...register("isPublished")} />
+            Public
+          </label>
+          <label className="flex gap-2">
+            <input type="radio" value="false" {...register("isPublished")} />
+            Private
+          </label>
+        </div>
 
+        <button className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+          Upload Video
+        </button>
 
-                    {
-                        errors.video && (
-                            <p className="text-red-500 bg-gray-200 mt-2">{errors.video.message}</p>
-                        )
-                    }
-                </div>
-                <div className="mb-3">
-                    {
-                        thumbnailFile && thumbnailFile.type.startsWith("image") ? (
-                            <div className="flex justify-center">
-                                <img
-                                    src={thumbnailPreviewUrl}
-                                    className="h-20 w-40 rounded overflow-hidden  "
-                                />
-                                <Input
-                                    lable="Thumbnail"
-                                    type="file"
-                                    placeholder="Upload File"
-                                    className="shadow-sm mx-2"
-
-                                    {
-                                    ...register("thumbnail", {
-                                        validate: {
-                                            checkFormat: (value) => {
-                                                const file = value[0];
-                                                if (!file) {
-                                                    return true
-                                                }
-                                                if (!thumbnailFormat.includes(file.type)) {
-                                                    return "Please Upload  only this type formated -> jpg, jpeg ,png, webp";
-                                                }
-                                                return true;
-
-                                            }
-                                        },
-                                        onChange: (e) => { handleThumbnailFileChange(e) }
-                                    }
-
-                                    )}
-
-                                />
-                            </div>
-                        ) : (
-                            <Input
-                                lable="Thumbnail"
-                                type="file"
-                                placeholder="Upload File"
-                                className="shadow-sm"
-
-                                {
-                                ...register("thumbnail", {
-                                    validate: {
-                                        checkFormat: (value) => {
-                                            const file = value[0];
-                                            if (!file) {
-                                                return true
-                                            }
-                                            if (!thumbnailFormat.includes(file.type)) {
-                                                return "Please Upload  only this type formated -> jpg, jpeg ,png, webp";
-                                            }
-                                            return true;
-
-                                        }
-                                    },
-                                    onChange: (e) => { handleThumbnailFileChange(e) }
-                                }
-
-                                )}
-
-                            />
-                        )
-                    }
-
-
-                    {
-                        errors.thumbnail && (
-                            <p className="text-red-500 bg-gray-200 mt-2">{errors.thumbnail.message}</p>
-                        )
-                    }
-                </div>
-
-                {/* include validation with required or other standard HTML validation rules */}
-                <div className="mb-3">
-                    <Input
-                        lable="Title"
-                        type="text"
-                        className="shadow-sm bg-transparent"
-
-                        placeholder="Enter your video title "
-                        {...register("title", { required: true })} />
-                    {/* errors will return when field validation fails  */}
-                    {errors.title && <span className="text-red-500 mt-2 rounded">This field is required</span>}
-                </div>
-
-                <div className="mb-3 shadow-sm">
-                    <Input
-                        lable="Description"
-                        type="text"
-                        className="bg-transparent"
-                        placeholder="Enter your video description"
-                        {...register("description", { required: true })} />
-                    {/* errors will return when field validation fails  */}
-                    {errors.title && <span className="mt-2 text-red-500">This field is required</span>}
-                </div>
-                <div className="bg-transparent ">
-                    <span className="mx-2">Category</span>
-                    <select
-                        className="w-full rounded-md mb-3 p-2 shadow-sm"
-                        {
-                        ...register("category",
-                            {
-                                required: "Category is required"
-                            }
-                        )
-                        }
-                    >
-                        <option value="">Select a Category</option>
-                        <option value="short">Short</option>
-                        <option value="video">Video</option>
-                    </select>
-                    {
-                        errors.category && (
-                            <span className="text-red-500 mb-2">This field is required</span>
-                        )
-                    }
-                </div>
-                <div className="flex w-full  mb-3 bg-slate-400 p-2 rounded-md">
-                    <div className="flex items-center w-1/2">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <Input
-                                type="radio"
-                                value="true"
-                                {...register("isPublished")}
-                            />
-                            <span>Public</span>
-                        </label>
-                    </div>
-
-                    <div className="flex items-end w-1/2">
-                        <label className="flex items-center gap-2 cursor-pointer">
-
-                            <Input
-                                type="radio"
-                                value="false"
-                                {...register("isPublished")}
-                            />
-                            <span>Private</span>
-                        </label>
-                    </div>
-
-                </div>
-
-
-                <input type="submit" className="mb-3 bg-blue-500 rounded-md px-4 py-2 hover:bg-blue-600 hover:px-[18px] hover:py-[10px]" />
-
-            </div>
-        </form>
-    );
-}
+      </div>
+    </form>
+  );
+};
 
 export default UploadVideo;

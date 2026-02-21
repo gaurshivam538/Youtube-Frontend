@@ -139,7 +139,7 @@ const ProfilePopup = () => {
 
 export default ProfilePopup
 
-const ProfileSkeleton = () => {
+export const ProfileSkeleton = () => {
   return (
    <div
    className='animate-pulse h-10 w-10 bg-gray-300 rounded-full'
