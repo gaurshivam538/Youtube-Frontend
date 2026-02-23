@@ -9,6 +9,7 @@ import { getNotification, getNotificationCount } from '../services/notification.
 import { timeAgo } from './VideoCard/homeLongVideoCard';
 import { ProfileSkeleton } from './ProfilePopup';
 import {Link} from "react-router-dom"
+import socket from '../Socket';
 
 const Notification = () => {
     const [open, setOpen] = useState(false);
@@ -60,6 +61,17 @@ const Notification = () => {
       }
       fetchNotification();
     }, [open, authData?._id]);
+//==============Socket Connection ka liya============//
+    useEffect(() => {
+
+        socket.on("notification:newVideo", (hai) => (
+          // {message, sender, type, entityId, entityType, title, thumbnail, senderAvatar, isRead }
+          console.log(hai)
+          // setNotifications((prev) => [,...prev])
+        ))
+      
+      return () => socket.off("notification:newVideo");
+    }, [authData?._id]);
 
   return (
     <div className=' relative z-10' ref ={menuRef}>
@@ -104,9 +116,9 @@ const Notification = () => {
         >
       <div key={notification._id} className="flex gap-3 items-center justify-center cursor-pointer hover:bg-gray-300 p-2 ">
        
-        {!notification.isRead && (
-          <div className="h-1 w-1 rounded-full bg-gray-400"></div>
-        )}
+        {notification.isRead ? (
+          <div className="h-1 w-1 rounded-full "></div>
+        ):( <div className="h-1 w-1 rounded-full bg-gray-400"></div>)}
 
         <div className="h-12 w-12">
           <img
